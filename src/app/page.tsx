@@ -1,10 +1,9 @@
-console.log('Rendering page component');
+export const dynamic = 'force-dynamic';
 
 import CompanionCard from "@/components/CompanionCard";
 import CompanionList from "@/components/CompanionList";
 import CTA from "@/components/CTA";
 import React from "react";
-import { recentSessions } from "../constants";
 import { getAllCompanions, getRecentSessions } from "@/lib/actions/companion.actions";
 import { getSubjectColor } from "@/lib/utils";
 // import { Companion } from "@/types";
