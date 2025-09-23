@@ -1,16 +1,31 @@
+console.log('Rendering page component');
+
 import CompanionCard from "@/components/CompanionCard";
 import CompanionList from "@/components/CompanionList";
 import CTA from "@/components/CTA";
 import React from "react";
 import { recentSessions } from "../constants";
+import { getAllCompanions, getRecentSessions } from "@/lib/actions/companion.actions";
+import { getSubjectColor } from "@/lib/utils";
+// import { Companion } from "@/types";
 
-const Page = () => {
+const Page = async () => {
+  const companions = await getAllCompanions({ limit: 3 }); 
+    const recentSessionsCompanions = await getRecentSessions(10)
+  
   return (
     <div className="max-w-7xl mx-auto px-6 pb-20">
       <h1 className="text-2xl underline">Popular Companions</h1>
       
       <section className="home-section">
-        <CompanionCard
+        {companions.map((companion) => (  
+                    <CompanionCard  
+                        key={companion.id}  
+                        {...companion}  
+                        color={getSubjectColor(companion.subject)}  
+                    />  
+                ))}  
+        {/* <CompanionCard
           id="123"
           name="Neura the Brainy Explorer"
           topic="Neural Network of the Brain"
@@ -33,13 +48,13 @@ const Page = () => {
           subject="English Literature"
           duration={30}
           color="#BDE7FF"
-        />
+        /> */}
       </section>
 
       <section className="home-section mt-8 flex justify-between items-stretch gap-6">
         <CompanionList
           title="Recently completed sessions"
-          companions={recentSessions}
+          companions={recentSessionsCompanions as Companion[]}
           classNames="w-2/3 max-lg:w-full"
         />
         <CTA />

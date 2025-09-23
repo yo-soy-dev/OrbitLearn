@@ -1,0 +1,7 @@
+{
+  "mcpServers": {
+    "Sentry": {
+      "url": "https://mcp.sentry.dev/mcp/soy-yo-dev/lms-saas-app"
+    }
+  }
+}
