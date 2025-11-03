@@ -2,6 +2,8 @@
 
 import { auth } from "@clerk/nextjs/server";
 import { createSupabaseClient } from "@lib/supabase";
+import { currentUser } from "@clerk/nextjs/server";
+
 
 export const createCompanion = async (formData: CreateCompanion) => {
     const { userId: author } = await auth();
@@ -148,3 +150,6 @@ export const newCompanionPermissions = async () => {
       return true;
     }
 }
+
+
+

@@ -40,8 +40,8 @@ const CompanionsList = ({ title, companions, classNames }: CompanionsListProps) 
 
         <TableBody>
           {companions.length > 0 ? (
-            companions.map(({ id, subject, name, topic, duration }) => (
-              <TableRow key={id}>
+            companions.map(({ id, subject, name, topic, duration }, index) => (
+              <TableRow key={`${id}-${index}`}>
                 {/* Lessons */}
                 <TableCell>
                   <Link href={`/companions/${id}`}>

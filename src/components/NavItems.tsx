@@ -2,9 +2,8 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { cn } from '@/lib/utils'; // utility for conditional classNames
+import { cn } from '@/lib/utils'; 
 
-// Define nav items
 const navItems = [
   { label: 'Home', href: '/' },
   { label: 'Companions', href: '/companions' },
