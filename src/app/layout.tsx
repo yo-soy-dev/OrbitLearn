@@ -31,9 +31,9 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <ClerkProvider appearance={{ variables : {colorPrimary: '#FF0000'}}}>
-        <Navbar />
-        {children}
+        <ClerkProvider appearance={{ variables: { colorPrimary: '#FF0000' } }}>
+          <Navbar />
+          {children}
         </ClerkProvider>
       </body>
     </html>

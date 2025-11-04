@@ -1,22 +1,50 @@
 'use server';
 
-import { auth } from "@clerk/nextjs/server";
+import { auth, currentUser } from "@clerk/nextjs/server";
 import { createSupabaseClient } from "@lib/supabase";
-import { currentUser } from "@clerk/nextjs/server";
+import { sendEmail } from "@/lib/mail";
 
 
 export const createCompanion = async (formData: CreateCompanion) => {
-    const { userId: author } = await auth();
-    const supabase = createSupabaseClient();
+  const { userId: author } = await auth();
+  const supabase = createSupabaseClient();
+  const user = await currentUser();
 
-    const { data, error } = await supabase
-        .from('companions')
-        .insert({ ...formData, author })
-        .select();
+  const { data, error } = await supabase
+    .from('companions')
+    .insert({ ...formData, author })
+    .select();
 
-    if (error || !data) throw new Error(error?.message || 'Failed to create a companion');
+  if (error || !data) throw new Error(error?.message || 'Failed to create a companion');
 
-    return data[0];
+  try {
+    const userEmail = user?.emailAddresses?.[0]?.emailAddress;
+    const userName = user?.firstName || "User";
+
+    if (userEmail) {
+      await sendEmail(
+        userEmail,
+        "🎉 Your Companion AI is Ready!",
+        `
+        <div style="font-family:Arial,sans-serif;line-height:1.5;">
+          <h2>Hello ${userName},</h2>
+          <p>Your new companion AI <b>${formData.name}</b> has been successfully created! 🚀</p>
+          <p>You can now start learning from it anytime.</p>
+          <a href="${process.env.NEXT_PUBLIC_APP_URL}/companions/${data[0].id}" 
+            style="background:#ef4444;color:white;padding:10px 20px;border-radius:6px;text-decoration:none;">
+            Start Talking
+          </a>
+          <p style="margin-top:20px;">— The Companion AI Team</p>
+        </div>
+        `
+      );
+      console.log(`📧 Email sent successfully to ${userEmail}`);
+    }
+  } catch (emailError) {
+    console.error("❌ Failed to send email:", emailError);
+  }
+
+  return data[0];
 };
 
 
@@ -43,24 +71,24 @@ export const getAllCompanions = async ({ limit = 10, page = 1, subject, topic }:
 
   const { data: companions, error } = await query;
 
-  if(error) throw new Error(error.message)
+  if (error) throw new Error(error.message)
 
   return companions;
 };
 
 export const getCompanion = async (id: string) => {
-    const supabase = createSupabaseClient();
+  const supabase = createSupabaseClient();
 
-    const { data, error } = await supabase
-        .from('companions')
-        .select()
-        .eq('id', id);
+  const { data, error } = await supabase
+    .from('companions')
+    .select()
+    .eq('id', id);
 
-    if (error) {
-        console.log(error);
-        return null;
-    }
-    return data?.[0] || null;
+  if (error) {
+    console.log(error);
+    return null;
+  }
+  return data?.[0] || null;
 };
 
 export const addToSessionHistory = async (companionId: string) => {
@@ -99,7 +127,7 @@ export const getUserSessions = async (userId: string, limit = 10) => {
   const { data, error } = await supabase
     .from("session_history")
     .select(`companions:companion_id (*)`)
-    .eq("user_id", userId) 
+    .eq("user_id", userId)
     .order("created_at", { ascending: false })
     .limit(limit);
 
@@ -109,47 +137,44 @@ export const getUserSessions = async (userId: string, limit = 10) => {
 };
 
 export const getUserCompanions = async (userId: string) => {
-    const supabase = createSupabaseClient();
-    const { data, error } = await supabase
-        .from('companions')
-        .select()
-        .eq('author', userId);
+  const supabase = createSupabaseClient();
+  const { data, error } = await supabase
+    .from('companions')
+    .select()
+    .eq('author', userId);
 
-    if(error) throw new Error(error.message);
+  if (error) throw new Error(error.message);
 
-    return data;
+  return data;
 }
 
+export const newCompanionPermissions = async () => { 
+  const { userId, has } = await auth(); 
+  const supabase = createSupabaseClient(); 
 
-export const newCompanionPermissions = async () => {
-    const { userId, has } = await auth();
-    const supabase = createSupabaseClient();
-
-    let limit = 0;
-
-    if(has({ plan: 'pro' })) {
-        return true;
-    } else if(has({ feature: "3_companion_limit" })) {
-        limit = 3;
-    } else if(has({ feature: "10_companion_limit" })) {
-        limit = 10;
-    }
-
+  let limit = 0;
+   if (has({ plan: 'pro' })) {
+    return true; 
+    } else if (has({ feature: "3_companion_limit" })) { 
+      limit = 3; 
+    } else if (has({ feature: "10_companion_limit" })) {
+       limit = 10;
+    } 
     const { data, error } = await supabase
-        .from('companions')
-        .select('id', { count: 'exact' })
-        .eq('author', userId);
-
-    if(error) throw new Error(error.message);
-
-    const companionCount = data?.length;
+    .from('companions')
+    .select('id', { count: 'exact' })
+    .eq('author', userId);
+    if (error) throw new Error(error.message); 
     
-    if (companionCount >= limit){
-      return false
-    } else {
-      return true;
+    const companionCount = data?.length;
+    if (companionCount >= limit) {
+       return false 
+      } else { 
+        return true; 
+      } 
     }
-}
+
+
 
 
 

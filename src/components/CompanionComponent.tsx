@@ -9,6 +9,7 @@ import soundwaves from '@/constants/soundwaves.json';
 import { Separator } from '@radix-ui/react-select';
 import { addToSessionHistory } from '@/lib/actions/companion.actions';
 
+
 enum CallStatus {
     INACTIVE = 'INACTIVE',
     CONNECTING = 'CONNECTING',
@@ -94,10 +95,27 @@ const CompanionComponent = ({
 
     useEffect(() => {
         const onCallStart = () => setCallStatus(CallStatus.ACTIVE);
-        const onCallEnd = () => {
+        // const onCallEnd = () => {
+        //     setCallStatus(CallStatus.FINISHED);
+        //     addToSessionHistory(companionId)
+        // }
+        const onCallEnd = async () => {
             setCallStatus(CallStatus.FINISHED);
-            addToSessionHistory(companionId)
-        }
+            vapi.stop();
+
+            try {
+                const transcriptText = messages.map((m) => `${m.role}: ${m.content}`).join("\n");
+
+                await fetch("/api/vapi/record", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ companionId, transcript: transcriptText }),
+                });
+            } catch (err) {
+                console.error("❌ Error recording Vapi talk:", err);
+            }
+        };
+
         const onSpeechStart = () => setIsSpeaking(true);
         const onSpeechEnd = () => setIsSpeaking(false);
         const onError = (error: Error) => console.error('VAPI Error:', error);
