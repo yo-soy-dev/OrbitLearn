@@ -73,3 +73,38 @@ export const configureAssistant = (voice: string, style: string) => {
 //   clientMessages: ['transcript'] as const,
 //   serverMessages: [],
 // });
+
+
+
+
+export const formUrlQuery = ({
+  params,
+  key,
+  value,
+}: {
+  params: string;
+  key: string;
+  value: string;
+}) => {
+  const searchParams = new URLSearchParams(params);
+
+  if (value === "all" || value === "") {
+    searchParams.delete(key);
+  } else {
+    searchParams.set(key, value);
+  }
+
+  return `?${searchParams.toString()}`;
+};
+
+export const removeKeysFromUrlQuery = ({
+  params,
+  keysToRemove,
+}: {
+  params: string;
+  keysToRemove: string[];
+}) => {
+  const searchParams = new URLSearchParams(params);
+  keysToRemove.forEach((key) => searchParams.delete(key));
+  return `?${searchParams.toString()}`;
+};

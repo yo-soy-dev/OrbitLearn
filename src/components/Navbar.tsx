@@ -1,3 +1,5 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
 import NavItems from "./NavItems";
@@ -13,7 +15,13 @@ const Navbar = () => {
     <nav className="navbar">
       <Link href="/">
         <div className="flex items-center gap-2.5 cursor-pointer">
-          <Image src="/images/logo.png" alt="logo" width={46} height={44} />
+          <div className="relative w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14">
+            <Image src="/images/logo.png" alt="logo"
+              //  width={46} height={44}
+              fill
+              className="object-contain"
+            />
+          </div>
         </div>
       </Link>
 

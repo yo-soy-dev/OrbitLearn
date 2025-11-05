@@ -148,33 +148,57 @@ export const getUserCompanions = async (userId: string) => {
   return data;
 }
 
-export const newCompanionPermissions = async () => { 
-  const { userId, has } = await auth(); 
-  const supabase = createSupabaseClient(); 
+// export const newCompanionPermissions = async () => { 
+//   const { userId, has } = await auth(); 
+//   const supabase = createSupabaseClient(); 
 
-  let limit = 0;
-   if (has({ plan: 'pro' })) {
-    return true; 
-    } else if (has({ feature: "3_companion_limit" })) { 
-      limit = 3; 
-    } else if (has({ feature: "10_companion_limit" })) {
-       limit = 10;
-    } 
-    const { data, error } = await supabase
-    .from('companions')
-    .select('id', { count: 'exact' })
-    .eq('author', userId);
-    if (error) throw new Error(error.message); 
+//   let limit = 0;
+//    if (has({ plan: 'pro' })) {
+//     return true; 
+//     } else if (has({ feature: "3_companion_limit" })) { 
+//       limit = 3; 
+//     } else if (has({ feature: "10_companion_limit" })) {
+//        limit = 10;
+//     } 
+//     const { data, error } = await supabase
+//     .from('companions')
+//     .select('id', { count: 'exact' })
+//     .eq('author', userId);
+//     if (error) throw new Error(error.message); 
     
-    const companionCount = data?.length;
-    if (companionCount >= limit) {
-       return false 
-      } else { 
-        return true; 
-      } 
-    }
+//     const companionCount = data?.length;
+//     if (companionCount >= limit) {
+//        return false 
+//       } else { 
+//         return true; 
+//       } 
+//     }
 
 
 
 
 
+export const newCompanionPermissions = async () => {
+  const { userId } = await auth();
+  const supabase = createSupabaseClient();
+
+  const { data: user } = await supabase
+    .from("users")
+    .select("plan")
+    .eq("id", userId)
+    .single();
+
+  const plan = user?.plan || "free";
+  const { data: companions } = await supabase
+    .from("companions")
+    .select("id")
+    .eq("author", userId);
+
+  const count = companions?.length || 0;
+
+  if (plan === "pro") return true;
+  if (plan === "core" && count < 3) return true;
+  if (plan === "free" && count < 1) return true;
+
+  return false;
+};
