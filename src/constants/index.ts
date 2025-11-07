@@ -16,10 +16,28 @@ export const subjectsColors = {
   economics: "#C8FFDF",
 };
 
+// export const voices = {
+//   male: { casual: "2BJW5coyhAzSr8STdHbE", formal: "c6SfcYrb2t09NHXiT80T" },
+//   female: { casual: "ZIlrSGI4jZqobxRKprJz", formal: "sarah" },
+// };
+
 export const voices = {
-  male: { casual: "2BJW5coyhAzSr8STdHbE", formal: "c6SfcYrb2t09NHXiT80T" },
-  female: { casual: "ZIlrSGI4jZqobxRKprJz", formal: "sarah" },
+  male: {
+    tutor: "2BJW5coyhAzSr8STdHbE",
+    coach: "2BJW5coyhAzSr8STdHbE",
+    storyteller: "c6SfcYrb2t09NHXiT80T",
+    socratic: "2BJW5coyhAzSr8STdHbE",
+    motivator: "c6SfcYrb2t09NHXiT80T",
+  },
+  female: {
+    tutor: "sarah",
+    coach: "ZIlrSGI4jZqobxRKprJz",
+    storyteller: "ZIlrSGI4jZqobxRKprJz",
+    socratic: "sarah",
+    motivator: "sarah",
+  },
 };
+
 
 export const recentSessions = [
   {

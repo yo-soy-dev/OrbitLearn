@@ -13,7 +13,8 @@ export const createCompanion = async (formData: CreateCompanion) => {
   const { data, error } = await supabase
     .from('companions')
     .insert({ ...formData, author })
-    .select();
+    .select()
+    .single();
 
   if (error || !data) throw new Error(error?.message || 'Failed to create a companion');
 
@@ -30,7 +31,7 @@ export const createCompanion = async (formData: CreateCompanion) => {
           <h2>Hello ${userName},</h2>
           <p>Your new companion AI <b>${formData.name}</b> has been successfully created! 🚀</p>
           <p>You can now start learning from it anytime.</p>
-          <a href="${process.env.NEXT_PUBLIC_APP_URL}/companions/${data[0].id}" 
+          <a href="${process.env.NEXT_PUBLIC_APP_URL}/companions/${data.id}" 
             style="background:#ef4444;color:white;padding:10px 20px;border-radius:6px;text-decoration:none;">
             Start Talking
           </a>
@@ -44,7 +45,7 @@ export const createCompanion = async (formData: CreateCompanion) => {
     console.error("❌ Failed to send email:", emailError);
   }
 
-  return data[0];
+  return data;
 };
 
 
@@ -202,3 +203,44 @@ export const newCompanionPermissions = async () => {
 
   return false;
 };
+
+export async function saveTranscript(companionId: string, transcript: string) {
+  const { userId } = await auth();
+  const supabase = createSupabaseClient();
+
+  const { data, error } = await supabase
+    .from("session_history")
+    .insert({
+      companion_id: companionId,
+      user_id: userId,
+      transcript,
+    });
+
+  if (error) {
+    console.error("❌ Error saving transcript:", error);
+    throw new Error(error.message);
+  }
+
+  return data;
+}
+
+export async function getLastTranscript(companionId: string) {
+  const { userId } = await auth();
+  const supabase = createSupabaseClient();
+
+  const { data, error } = await supabase
+    .from("session_history")
+    .select("transcript")
+    .eq("companion_id", companionId)
+    .eq("user_id", userId)
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .single();
+
+  if (error) {
+    console.error("❌ getLastTranscript Error:", error);
+    return { transcript: null };
+  }
+
+  return { transcript: data?.transcript || null };
+}

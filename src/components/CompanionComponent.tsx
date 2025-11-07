@@ -8,6 +8,8 @@ import React, { useEffect, useRef, useState } from 'react';
 import soundwaves from '@/constants/soundwaves.json';
 import { Separator } from '@radix-ui/react-select';
 import { addToSessionHistory } from '@/lib/actions/companion.actions';
+import { useRouter } from "next/navigation";
+
 
 
 enum CallStatus {
@@ -28,6 +30,12 @@ interface CompanionComponentProps {
     voice: string;
 }
 
+interface QuizQuestion {
+    question: string;
+    options: string[];
+    answer: string;
+}
+
 const CompanionComponent = ({
     companionId,
     subject,
@@ -43,6 +51,9 @@ const CompanionComponent = ({
     const [isMuted, setIsMuted] = useState(false);
     const lottieRef = useRef<LottieRefCurrentProps>(null);
     const [messages, setMessages] = useState<SavedMessage[]>([]);
+    const [quiz, setQuiz] = useState<QuizQuestion[]>([]);
+    const router = useRouter();
+
 
     useEffect(() => {
         if (lottieRef.current) {
@@ -67,6 +78,7 @@ const CompanionComponent = ({
             clientMessages: ["transcript"],
             serverMessages: undefined,
         };
+
         try {
             vapi.start(configureAssistant(voice, style), assistantOverrides);
         } catch (err) {
@@ -81,14 +93,18 @@ const CompanionComponent = ({
         vapi.stop()
     };
 
+    const messagesRef = useRef<SavedMessage[]>([]);
     const onMessage = (message: Message) => {
-        if (message.type === 'transcript' && message.transcriptType === 'final') {
+        if (message.type === 'transcript'
+            //  && message.transcriptType === 'final'
+        ) {
             const newMessage = {
                 role: message.role,
                 content: message.transcript
             };
 
-            setMessages((prev) => [newMessage, ...prev]);
+            messagesRef.current = [newMessage, ...messagesRef.current];
+            setMessages([...messagesRef.current]);
         }
     };
 
@@ -103,16 +119,44 @@ const CompanionComponent = ({
             setCallStatus(CallStatus.FINISHED);
             vapi.stop();
 
+            const transcriptText = messagesRef.current.map((m) => `${m.role}: ${m.content}`).join("\n");
+
+            
+
             try {
-                const transcriptText = messages.map((m) => `${m.role}: ${m.content}`).join("\n");
+                // if (messages.length > 0) {
 
                 await fetch("/api/vapi/record", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ companionId, transcript: transcriptText }),
                 });
+                console.log("📝 Transcript before sending:", transcriptText, "Messages array:", messagesRef.current);
+                // } else {
+                //     console.warn("⚠️ No messages captured — skipping transcript upload");
+                // }
             } catch (err) {
                 console.error("❌ Error recording Vapi talk:", err);
+            }
+
+            await new Promise(r => setTimeout(r, 600));
+
+            try {
+
+                const quizRes = await fetch("/api/quiz/generate", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ companionId }),
+                });
+                const quizData = await quizRes.json();
+                // Store quiz in state for display
+                setQuiz(quizData || []);
+
+                console.log("✅ redirecting to quiz now");
+                router.push("/quiz");
+
+            } catch (err) {
+                console.error("❌ Error generating quiz:", err);
             }
         };
 
@@ -292,6 +336,21 @@ const CompanionComponent = ({
                 </div>
                 <div className="transcript-fade" />
             </section>
+            {quiz.length > 0 && (
+                <section className="quiz-section mt-4">
+                    <h3 className="text-xl font-bold mb-2">Test Your Knowledge</h3>
+                    {quiz.map((q, idx) => (
+                        <div key={idx} className="mb-4">
+                            <p className="font-semibold">{q.question}</p>
+                            <div className="flex flex-col gap-2 mt-1">
+                                {q.options.map((opt, i) => (
+                                    <button key={i} className="btn-option">{opt}</button>
+                                ))}
+                            </div>
+                        </div>
+                    ))}
+                </section>
+            )}
         </section>
     );
 };

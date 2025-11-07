@@ -35,17 +35,25 @@ export async function POST(req: Request) {
   }
 
   const eventType = evt.type;
-  const supabase = createSupabaseClient();
 
   if (eventType === "subscription.created" || eventType === "subscription.updated") {
     const userId = evt.data.user_id;
     const plan = evt.data.plan_id || "free";
 
-    await supabase.from("users").update({ plan }).eq("id", userId);
+    const supabase = createSupabaseClient();
 
+    const { error} = await supabase.from("users").update({ plan }).eq("id", userId);
+
+    if (error) console.error("Supabase update failed:", error);
+
+    try {
     await clerk.users.updateUserMetadata(userId, {
       publicMetadata: { plan },
     });
+    } catch (err) {
+    console.error("Clerk metadata update failed:", err);
+  }
+
 
     console.log(`✅ Updated user ${userId} plan to ${plan}`);
   }

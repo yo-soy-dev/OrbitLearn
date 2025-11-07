@@ -31,6 +31,7 @@ const formSchema = z.object({
   voice: z.string().min(1, { message: "Voice is required." }),
   style: z.string().min(1, { message: "Style is required." }),
   duration: z.string().min(1, { message: "Duration is required." }),
+  goal: z.string().optional(),
 });
 
 const CompanionForm = () => {
@@ -43,25 +44,26 @@ const CompanionForm = () => {
       voice: "",
       style: "",
       duration: "",
+      goal: "",
     },
   });
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
-  const companion = await createCompanion({
-    ...values,
-    duration: Number(values.duration), 
-  });
+    const companion = await createCompanion({
+      ...values,
+      duration: Number(values.duration),
+    });
 
-  if (companion) {
-    redirect(`/companions/${companion.id}`);
-  } else {
-    console.log('Failed to create a companion');
-    redirect('/');
-  }
-};
+    if (companion) {
+      redirect(`/companions/${companion.id}`);
+    } else {
+      console.log('Failed to create a companion');
+      redirect('/');
+    }
+  };
 
 
-  const subjects = ["maths", "language", "science", "history", "coding", "geography", "economics", "finance", "business" ]; 
+  const subjects = ["maths", "language", "science", "history", "coding", "geography", "economics", "finance", "business"];
 
 
   return (
@@ -158,7 +160,7 @@ const CompanionForm = () => {
           )}
         />
 
-        <FormField
+        {/* <FormField
           control={form.control}
           name="style"
           render={({ field }) => (
@@ -180,9 +182,78 @@ const CompanionForm = () => {
                 </Select>
               </FormControl>
               <FormMessage />
+            </FormItem> */}
+        {/* )}
+        /> */}
+
+        <FormField
+          control={form.control}
+          name="style"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Companion Personality</FormLabel>
+              <FormControl>
+                <Select
+                  onValueChange={field.onChange}
+                  value={field.value}
+                  defaultValue={field.value}
+                >
+                  <SelectTrigger className="input">
+                    <SelectValue placeholder="Select personality" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="tutor">🎓 Tutor - Formal and structured</SelectItem>
+                    <SelectItem value="coach">🏋️ Coach - Friendly and motivating</SelectItem>
+                    <SelectItem value="storyteller">📖 Storyteller - Uses examples and stories</SelectItem>
+                    <SelectItem value="socratic">💭 Socratic Mentor - Guides with questions</SelectItem>
+                    <SelectItem value="motivator">🔥 Motivator - Energetic and positive</SelectItem>
+                  </SelectContent>
+                </Select>
+              </FormControl>
+              <FormMessage />
             </FormItem>
           )}
         />
+
+        {form.watch("style") && (
+          <div className="mt-3 p-3 rounded-lg border bg-gray-50 text-sm italic transition-all duration-300">
+            {form.watch("style") === "tutor" && (
+              <>🧑‍🏫 I'll explain things step-by-step, like your favorite teacher.</>
+            )}
+            {form.watch("style") === "coach" && (
+              <>💪 Let's crush this topic together — I'll keep you motivated!</>
+            )}
+            {form.watch("style") === "storyteller" && (
+              <>📖 Let's explore through fun stories and examples!</>
+            )}
+            {form.watch("style") === "socratic" && (
+              <>🤔 I'll guide you with questions to help you think deeply.</>
+            )}
+            {form.watch("style") === "motivator" && (
+              <>🔥 You've got this! I'll keep you inspired while you learn.</>
+            )}
+          </div>
+        )}
+
+        <Button
+          type="button"
+          variant="outline"
+          className="mt-2 text-sm"
+          onClick={() => {
+            const voiceType = form.watch("voice") || "female";
+            const styleType = form.watch("style") || "tutor";
+            const utterance = new SpeechSynthesisUtterance(
+              `Hi, I'm your ${styleType} ${voiceType} companion!`
+            );
+            utterance.lang = "en-US";
+            speechSynthesis.speak(utterance);
+          }}
+        >
+          🔊 Preview Voice
+        </Button>
+
+
+
 
         <FormField
           control={form.control}
@@ -203,8 +274,77 @@ const CompanionForm = () => {
           )}
         />
 
-        <Button type="submit" className="w-full cursor-pointer">
-          Build Your Companion
+        <FormField
+          control={form.control}
+          name="goal"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Learning Goal (optional)</FormLabel>
+              <FormControl>
+                <Input
+                  placeholder="e.g. Understand the basics of algebra"
+                  {...field}
+                  className="input"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {form.watch("goal") && (
+          <div className="mt-3 text-sm text-gray-600">
+            🎯 <span className="font-semibold">Learning Goal:</span> {form.watch("goal")}
+          </div>
+        )}
+
+
+
+        <div className="flex flex-col sm:flex-row gap-3">
+          <Button
+            type="button"
+            variant="secondary"
+            className="flex-1"
+            onClick={(e) => {
+              e.preventDefault(); // stop form submission
+              try {
+                localStorage.setItem("companionPreset", JSON.stringify(form.getValues()));
+                // alert("✅ Preset saved successfully!");
+              } catch (err) {
+                console.error("Error saving preset:", err);
+                // alert("❌ Failed to save preset");
+              }
+            }}
+          >
+            💾 Save Preset
+          </Button>
+
+          <Button
+            type="button"
+            variant="ghost"
+            className="flex-1"
+            onClick={(e) => {
+              e.preventDefault();
+              try {
+                const preset = localStorage.getItem("companionPreset");
+                if (preset) {
+                  form.reset(JSON.parse(preset));
+                  // alert("♻️ Preset loaded!");
+                } else {
+                  // alert("⚠️ No preset found!");
+                }
+              } catch (err) {
+                console.error("Error loading preset:", err);
+                // alert("❌ Failed to load preset");
+              }
+            }}
+          >
+            ♻️ Load Preset
+          </Button>
+        </div>
+
+        <Button type="submit" className="w-full cursor-pointer mt-4">
+          🚀 Build Your Companion
         </Button>
       </form>
     </Form>

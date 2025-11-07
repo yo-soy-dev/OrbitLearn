@@ -34,6 +34,7 @@ interface CreateCompanion {
   voice: string;
   style: string;
   duration: number;
+  goal?: string;
 }
 
 interface GetAllCompanions {

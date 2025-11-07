@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 import { recordVapiTalk } from "@/lib/actions/talk.actions";
+import { saveTranscript } from "@/lib/actions/companion.actions";
+
 
 export async function POST(req: Request) {
   try {
@@ -8,6 +10,8 @@ export async function POST(req: Request) {
     console.log("📥 /api/vapi/record received:", { companionId, transcriptLength: transcript?.length });
 
     const result = await recordVapiTalk(companionId, transcript);
+
+     await saveTranscript(companionId, transcript);
 
     console.log("✅ recordVapiTalk completed:", result);
 
