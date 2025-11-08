@@ -121,7 +121,7 @@ const CompanionComponent = ({
 
             const transcriptText = messagesRef.current.map((m) => `${m.role}: ${m.content}`).join("\n");
 
-            
+
 
             try {
                 // if (messages.length > 0) {
@@ -132,31 +132,30 @@ const CompanionComponent = ({
                     body: JSON.stringify({ companionId, transcript: transcriptText }),
                 });
                 console.log("📝 Transcript before sending:", transcriptText, "Messages array:", messagesRef.current);
-                // } else {
-                //     console.warn("⚠️ No messages captured — skipping transcript upload");
-                // }
             } catch (err) {
                 console.error("❌ Error recording Vapi talk:", err);
             }
 
-            await new Promise(r => setTimeout(r, 600));
+            await new Promise(r => setTimeout(r, 200));
 
             try {
 
                 const quizRes = await fetch("/api/quiz/generate", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ companionId }),
+                    body: JSON.stringify({ companionId, transcript: transcriptText }),
                 });
+
                 const quizData = await quizRes.json();
-                // Store quiz in state for display
+
                 setQuiz(quizData || []);
 
-                console.log("✅ redirecting to quiz now");
-                router.push("/quiz");
+                // console.log("✅ redirecting to quiz now");
+                // router.push("/quiz");
 
             } catch (err) {
                 console.error("❌ Error generating quiz:", err);
+                // setQuiz([]);
             }
         };
 

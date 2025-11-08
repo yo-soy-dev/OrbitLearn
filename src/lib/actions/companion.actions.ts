@@ -113,7 +113,7 @@ export const getRecentSessions = async (limit = 10) => {
 
   const { data, error } = await supabase
     .from("session_history")
-    .select(`companions:companion_id (*)`)
+    .select(`id, created_at, confidence_score, companion_id,companions:companion_id (*)`)
     .order("created_at", { ascending: false })
     .limit(limit);
 
@@ -127,14 +127,20 @@ export const getUserSessions = async (userId: string, limit = 10) => {
 
   const { data, error } = await supabase
     .from("session_history")
-    .select(`companions:companion_id (*)`)
+    .select(`id, created_at, confidence_score, summary, takeaways, next_steps, companion_id, companions:companion_id (*)`)
     .eq("user_id", userId)
     .order("created_at", { ascending: false })
     .limit(limit);
 
   if (error) throw new Error(error.message);
 
-  return data?.map(({ companions }) => companions);
+  return data?.map(({ companions, ...session }) => ({
+    ...session,
+    ...companions || {},
+}));
+
+
+// return data?.map(({ companions }) => (companions))
 };
 
 export const getUserCompanions = async (userId: string) => {
@@ -166,7 +172,7 @@ export const getUserCompanions = async (userId: string) => {
 //     .select('id', { count: 'exact' })
 //     .eq('author', userId);
 //     if (error) throw new Error(error.message); 
-    
+
 //     const companionCount = data?.length;
 //     if (companionCount >= limit) {
 //        return false 
@@ -204,17 +210,51 @@ export const newCompanionPermissions = async () => {
   return false;
 };
 
+interface SessionHistory {
+  companion_id: string;
+  user_id: string;
+  transcript: string;
+  created_at?: string;
+}
+
+
+
+
+const cleanTranscript = (raw: string, minLength = 5): string => {
+  const lines = raw
+    .split("\n")
+    .map(line => line.trim())
+    .filter(line => line.length >= minLength);
+
+  const seen = new Set<string>();
+  const uniqueLines: string[] = [];
+  for (const line of lines) {
+    if (!seen.has(line)) {
+      seen.add(line);
+      uniqueLines.push(line);
+    }
+  }
+
+  return uniqueLines.join("\n");
+};
+
 export async function saveTranscript(companionId: string, transcript: string) {
   const { userId } = await auth();
+  if (!userId) throw new Error("User not authenticated");
+
   const supabase = createSupabaseClient();
+  const cleanedTranscript = cleanTranscript(transcript);
 
   const { data, error } = await supabase
     .from("session_history")
     .insert({
       companion_id: companionId,
       user_id: userId,
-      transcript,
-    });
+      transcript: cleanedTranscript,
+    })
+    .select("id") 
+    .single();
+
 
   if (error) {
     console.error("❌ Error saving transcript:", error);
@@ -226,6 +266,8 @@ export async function saveTranscript(companionId: string, transcript: string) {
 
 export async function getLastTranscript(companionId: string) {
   const { userId } = await auth();
+  if (!userId) throw new Error("User not authenticated");
+
   const supabase = createSupabaseClient();
 
   const { data, error } = await supabase
@@ -237,10 +279,59 @@ export async function getLastTranscript(companionId: string) {
     .limit(1)
     .single();
 
+  const transcript = data?.transcript as string | undefined;
+
+
   if (error) {
     console.error("❌ getLastTranscript Error:", error);
     return { transcript: null };
   }
 
-  return { transcript: data?.transcript || null };
+  const cleanedTranscript = data?.transcript
+    ? cleanTranscript(data.transcript)
+    : null;
+
+  return { transcript: cleanedTranscript };
+}
+
+
+export async function saveSessionInsights({
+  sessionId,
+  summary,
+  takeaways = [],
+  next_steps = [],
+  confidence_score = 0
+}: {
+  sessionId: string;
+  summary: string[];
+  takeaways?: string[];
+  next_steps?: string[];
+  confidence_score?: number;
+}) {
+  if (!sessionId) throw new Error("Session ID is required");
+  const { userId } = await auth();
+  if (!userId) throw new Error("User not authenticated");
+
+  const supabase = createSupabaseClient();
+
+
+  const { data, error } = await supabase
+    .from("session_history")
+    .update({
+      summary,
+      takeaways,
+      next_steps,
+      confidence_score,
+    })
+    .eq("id", sessionId)
+    .eq("user_id", userId)
+    .select("*")
+    .single();
+
+  if (error) {
+    console.error("❌ Error saving session insights:", error);
+    throw new Error(error.message);
+  }
+
+  return data;
 }

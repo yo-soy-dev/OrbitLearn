@@ -4,12 +4,24 @@ import { redirect } from "next/navigation";
 import { getUserCompanions, getUserSessions } from "@/lib/actions/companion.actions";
 import Image from "next/image";
 import CompanionsList from "@/components/CompanionList";
+// import SessionHistoryList from "@/components/SessionHistoryList";  
+import ProgressCharts from "@/components/ProgressCharts";          
+import LearningStreak from "@/components/LearningStreak";
 
 const Profile = async () => {
     const user = await currentUser()
     if(!user) redirect('/sign-in');
     const companions = await getUserCompanions(user.id);
-    const sessionHistory = await getUserSessions(user.id);
+    // const sessionHistory = await getUserSessions(user.id);
+    const rawSessions = (await getUserSessions(user.id)).flat();
+
+    const sessionHistory = rawSessions.map(s => ({
+  ...s,
+  createdAt: s.created_at,
+}));
+    
+
+
 
     return (
         <main className="min-lg:w-3/4">
@@ -57,6 +69,12 @@ const Profile = async () => {
                     </div>
                 </div>
             </section>
+
+            <LearningStreak companionList={sessionHistory} />
+
+            <ProgressCharts sessionHistory={sessionHistory} />
+
+
             <Accordion type="multiple">
                 <AccordionItem value="recent">
                     <AccordionTrigger className="text-2xl font-bold">
@@ -67,6 +85,7 @@ const Profile = async () => {
                             title="Recent Sessions" 
                             companions={sessionHistory as Companion[]} 
                         />
+                        {/* <SessionHistoryList sessions={sessionHistory} /> */}
                     </AccordionContent>
                 </AccordionItem>
                  <AccordionItem value="companions">
