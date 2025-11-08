@@ -25,6 +25,10 @@ type Companion = Models.DocumentList<Models.Document> & {
   topic: string;
   duration: number;
   bookmarked: boolean;
+  summary?: string[];
+  takeaways?: string[];
+  next_steps?: string[];
+  confidence_score?: number;
 };
 
 interface CreateCompanion {

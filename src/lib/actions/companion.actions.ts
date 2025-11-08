@@ -134,14 +134,60 @@ export const getUserSessions = async (userId: string, limit = 10) => {
 
   if (error) throw new Error(error.message);
 
-  return data?.map(({ companions, ...session }) => ({
-    ...session,
+  return data?.map(({ companions, summary, takeaways, next_steps, confidence_score, ...session }) => ({
     ...companions || {},
+    ...session,
+    summary,
+    takeaways,
+    next_steps,
+    confidence_score,
 }));
 
 
-// return data?.map(({ companions }) => (companions))
+// // return data?.map(({ companions }) => (companions))
 };
+
+
+// export const getUserSessions = async (userId: string, limit = 10) => {
+//   const supabase = createSupabaseClient();
+
+//   const { data, error } = await supabase
+//     .from("session_history")
+//     .select(`
+//       id,
+//       duration,
+//       confidence_score,
+//       summary,
+//       takeaways,
+//       next_steps,
+//       companion_id,
+//       companions:companion_id (*)
+//     `)
+//     .eq("user_id", userId)
+//     .order("created_at", { ascending: false })
+//     .limit(limit);
+
+//   if (error) throw new Error(error.message);
+
+//   return data?.map(({ companions, summary, takeaways, next_steps, confidence_score, id, duration }) => {
+//     const companion = Array.isArray(companions) ? companions[0] : companions;
+
+//     return {
+//       sessionId: id,
+//       companionId: companion?.id ?? null,
+//       name: companion?.name ?? "",
+//       subject: companion?.subject ?? "",
+//       topic: companion?.topic ?? "",
+//       duration: duration ?? 0,
+//       summary: summary ? JSON.parse(summary) : [],
+//       takeaways: takeaways ? JSON.parse(takeaways) : [],
+//       next_steps: next_steps ? JSON.parse(next_steps) : [],
+//       confidence_score: confidence_score ?? 0,
+//     };
+//   }) || [];
+// };
+
+
 
 export const getUserCompanions = async (userId: string) => {
   const supabase = createSupabaseClient();
@@ -209,14 +255,6 @@ export const newCompanionPermissions = async () => {
 
   return false;
 };
-
-interface SessionHistory {
-  companion_id: string;
-  user_id: string;
-  transcript: string;
-  created_at?: string;
-}
-
 
 
 

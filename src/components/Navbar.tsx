@@ -25,7 +25,7 @@ const Navbar = () => {
         </div>
       </Link>
 
-      <div className="flex items-center gap-8">
+      <div className="flex items-center gap-4 sm:gap-8 flex-wrap justify-end max-sm:text-sm">
         <NavItems />
         <SignedOut>
           <SignInButton>
