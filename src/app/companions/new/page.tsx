@@ -13,7 +13,7 @@ const NewCompanion = async () => {
     <main className="min-lg:w-1/3 min-md:w-2/3 mx-auto flex flex-col items-center justify-center pb-16">
       {/* {hasPermission ? ( */}
          <article className="w-full gap-4 flex flex-col">
-          <h1>Companion Builder</h1>
+          <h1>Study Buddy Builder</h1>
           <CompanionForm />
         </article>
       {/* ) : ( */}

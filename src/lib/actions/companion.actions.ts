@@ -92,6 +92,7 @@ export const getCompanion = async (id: string) => {
   return data?.[0] || null;
 };
 
+
 export const addToSessionHistory = async (companionId: string) => {
   const { userId } = await auth();
   const supabase = createSupabaseClient();
@@ -113,14 +114,62 @@ export const getRecentSessions = async (limit = 10) => {
 
   const { data, error } = await supabase
     .from("session_history")
-    .select(`id, created_at, confidence_score, companion_id,companions:companion_id (*)`)
+    .select(`
+      id, 
+      created_at, 
+      confidence_score, 
+      summary,
+      takeaways,
+      next_steps,
+      companion_id, 
+      companions:companion_id (*)
+    `)
     .order("created_at", { ascending: false })
     .limit(limit);
 
   if (error) throw new Error(error.message);
 
-  return data?.map(({ companions }) => companions);
-};
+//   return data?.map(({ companions, summary, takeaways, next_steps, confidence_score, ...session }) => ({
+
+//     ...companions || {},
+//     ...session,
+//     summary,
+//     takeaways,
+//     next_steps,
+//     confidence_score,
+//     companion: companions || null, 
+// }));
+
+
+ return data?.map(({ companions, summary, takeaways, next_steps, confidence_score, ...session }) => ({
+   ...companions || {},
+   ...session,
+    summary,
+    takeaways,
+    next_steps,
+    confidence_score,
+    // companion: companions || null,
+}));
+
+}
+
+
+
+// export const getRecentSessions = async (limit = 10) => {
+//   const supabase = createSupabaseClient();
+
+//   const { data, error } = await supabase
+//     .from("session_history")
+//     .select(`id, created_at, confidence_score, companion_id,companions:companion_id (*)`)
+//     .order("created_at", { ascending: false })
+//     .limit(limit);
+
+//   if (error) throw new Error(error.message);
+
+//   return data?.map(({ companions }) => companions);
+// };
+
+
 
 export const getUserSessions = async (userId: string, limit = 10) => {
   const supabase = createSupabaseClient();
@@ -141,51 +190,12 @@ export const getUserSessions = async (userId: string, limit = 10) => {
     takeaways,
     next_steps,
     confidence_score,
-}));
+  }));
 
 
-// // return data?.map(({ companions }) => (companions))
+  // // return data?.map(({ companions }) => (companions))
 };
 
-
-// export const getUserSessions = async (userId: string, limit = 10) => {
-//   const supabase = createSupabaseClient();
-
-//   const { data, error } = await supabase
-//     .from("session_history")
-//     .select(`
-//       id,
-//       duration,
-//       confidence_score,
-//       summary,
-//       takeaways,
-//       next_steps,
-//       companion_id,
-//       companions:companion_id (*)
-//     `)
-//     .eq("user_id", userId)
-//     .order("created_at", { ascending: false })
-//     .limit(limit);
-
-//   if (error) throw new Error(error.message);
-
-//   return data?.map(({ companions, summary, takeaways, next_steps, confidence_score, id, duration }) => {
-//     const companion = Array.isArray(companions) ? companions[0] : companions;
-
-//     return {
-//       sessionId: id,
-//       companionId: companion?.id ?? null,
-//       name: companion?.name ?? "",
-//       subject: companion?.subject ?? "",
-//       topic: companion?.topic ?? "",
-//       duration: duration ?? 0,
-//       summary: summary ? JSON.parse(summary) : [],
-//       takeaways: takeaways ? JSON.parse(takeaways) : [],
-//       next_steps: next_steps ? JSON.parse(next_steps) : [],
-//       confidence_score: confidence_score ?? 0,
-//     };
-//   }) || [];
-// };
 
 
 
@@ -290,7 +300,7 @@ export async function saveTranscript(companionId: string, transcript: string) {
       user_id: userId,
       transcript: cleanedTranscript,
     })
-    .select("id") 
+    .select("id")
     .single();
 
 
@@ -373,3 +383,260 @@ export async function saveSessionInsights({
 
   return data;
 }
+
+const difficultyMultiplier: Record<string, number> = {
+  Easy: 5,
+  Medium: 7,
+  Hard: 10,
+};
+
+function calculateXP(score: number, total: number, difficulty: string) {
+  const multiplier = difficultyMultiplier[difficulty] || 5;
+  return score * multiplier;
+}
+
+export async function updateUserProgress({
+  score,
+  total,
+  difficulty,
+  subject
+}: {
+  score: number;
+  total: number;
+  difficulty: string;
+  subject: string;
+}) {
+
+  const { userId } = await auth();
+  if (!userId) throw new Error("Not authenticated");
+
+  const supabase = createSupabaseClient();
+  const xpEarned = calculateXP(score, total, difficulty);
+
+  // ✅ Use maybeSingle() so it does NOT throw
+  const { data: stats, error: statsError } = await supabase
+    .from("user_stats")
+    .select("*")
+    .eq("user_id", userId)
+    .maybeSingle();
+
+  if (statsError) {
+    console.error("❌ Error fetching stats:", statsError);
+  }
+
+  console.log("📌 Existing Stats:", stats);
+
+  const today = new Date().toISOString().split("T")[0];
+
+  let streak = stats?.streak ?? 0;
+  let lastQuiz = stats?.last_quiz_date ?? null;
+
+  // ✅ STREAK CALCULATION FIXED
+  if (!lastQuiz) {
+    streak = 1;
+  } else {
+    const last = new Date(lastQuiz);
+    const diff =
+      (new Date().getTime() - last.getTime()) / (1000 * 3600 * 24);
+
+    if (diff < 1) {
+      // same day → no change
+    } else if (diff < 2) {
+      streak += 1;
+    } else {
+      streak = 1;
+    }
+  }
+
+  const newXP = (stats?.xp ?? 0) + xpEarned;
+  const level = Math.floor(newXP / 200) + 1;
+
+  const payload = {
+    user_id: userId,
+    xp: newXP,
+    level,
+    streak,
+    last_quiz_date: today
+  };
+
+  console.log("⬆️ Upserting payload:", payload);
+
+  const { data, error } = await supabase
+    .from("user_stats")
+    .upsert(payload)
+    .select()
+    .single();
+
+  if (error) {
+    console.error("❌ Supabase upsert error:", error);
+    throw new Error(error.message);
+  }
+
+  return {
+    xpEarned,
+    totalXP: newXP,
+    level,
+    streak,
+  };
+}
+
+export async function handleQuizCompletion({
+  score,
+  total,
+  difficulty,
+  subject,
+}: {
+  score: number;
+  total: number;
+  difficulty: string;
+  subject: string;
+}) {
+  const progress = await updateUserProgress({ score, total, difficulty, subject });
+
+  // Example badge rules
+  if (progress.streak >= 7) await unlockAchievement("7-day-streak");
+  if (score === total) await unlockAchievement("perfect-score");
+  if (progress.streak === 1) await unlockAchievement("first-quiz");
+
+  return progress;
+}
+
+export async function getUserStats() {
+  const { userId } = await auth();
+  if (!userId) throw new Error("Not authenticated");
+
+  const supabase = createSupabaseClient();
+
+  const { data, error } = await supabase
+    .from("user_stats")
+    .select("*")
+    .eq("user_id", userId)
+    .maybeSingle();
+
+  if (error) {
+    console.error("❌ Error fetching user stats:", error);
+    throw new Error(error.message);
+  }
+
+  return data || { xp: 0, level: 1, streak: 0, last_quiz_date: null };
+}
+
+export async function getUserAchievements() {
+  const { userId } = await auth();
+  if (!userId) throw new Error("Not authenticated");
+
+  const supabase = createSupabaseClient();
+
+  const { data, error } = await supabase
+    .from("achievements")
+    .select("*")
+    .eq("user_id", userId);
+
+  if (error) {
+    console.error("❌ Error fetching achievements:", error);
+    throw new Error(error.message);
+  }
+
+  return data || [];
+}
+
+export async function unlockAchievement(badge: string) {
+  const { userId } = await auth();
+  if (!userId) throw new Error("Not authenticated");
+
+  const supabase = createSupabaseClient();
+
+  // ✅ Check if already unlocked
+  const { data: existing } = await supabase
+    .from("achievements")
+    .select("id")
+    .eq("user_id", userId)
+    .eq("badge", badge)
+    .maybeSingle();
+
+  if (existing) return existing; // already unlocked
+
+  const { data, error } = await supabase
+    .from("achievements")
+    .insert({ user_id: userId, badge })
+    .select()
+    .single();
+
+  if (error) {
+    console.error("❌ Error unlocking achievement:", error);
+    throw new Error(error.message);
+  }
+
+  return data;
+}
+
+// export async function getLeaderboard(limit = 10) {
+//   const supabase = createSupabaseClient();
+
+//   const { data, error } = await supabase
+//     .from("user_stats")
+//     .select(`
+//       user_id,
+//       xp,
+//       level,
+//       users:user_id (
+//         first_name,
+//         last_name,
+//         image_url
+//       )
+//     `)
+//     .order("xp", { ascending: false })
+//     .limit(limit);
+
+//   if (error) {
+//     console.error("❌ Error fetching leaderboard:", error);
+//     throw new Error(error.message);
+//   }
+
+//   return (data || []).map((d) => {
+//     const user = Array.isArray(d.users) ? d.users[0] : null;
+//     return {
+//       user_id: d.user_id,
+//       xp: d.xp,
+//       level: d.level,
+//       name: `${user?.first_name || ""} ${user?.last_name || ""}`,
+//       avatar: user?.image_url || "/icons/avatar-placeholder.png",
+//     };
+//   });
+// }
+
+export async function getLeaderboard(limit = 10) {
+  const supabase = createSupabaseClient();
+
+  const { data: stats, error } = await supabase
+    .from("user_stats")
+    .select("*")
+    .order("xp", { ascending: false })
+    .limit(limit);
+
+  if (error) {
+    console.error("❌ Error fetching leaderboard:", error);
+    return [];
+  }
+
+  const leaderboard = await Promise.all(
+    stats.map(async (stat) => {
+      const { data: user } = await supabase
+        .from("users")
+        .select("first_name, last_name, image_url")
+        .eq("id", stat.user_id)
+        .maybeSingle();
+
+      return {
+        user_id: stat.user_id,
+        xp: stat.xp,
+        level: stat.level,
+        name: `${user?.first_name || ""} ${user?.last_name || ""}`,
+        avatar: user?.image_url || "/icons/avatar-placeholder.png",
+      };
+    })
+  );
+
+  return leaderboard;
+}
+

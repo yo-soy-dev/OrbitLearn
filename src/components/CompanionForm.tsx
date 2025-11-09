@@ -74,7 +74,7 @@ const CompanionForm = () => {
           name="name"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Companion Name</FormLabel>
+              <FormLabel>Study Buddy Name</FormLabel>
               <FormControl>
                 <Input
                   placeholder="Enter the companion name"
@@ -125,7 +125,7 @@ const CompanionForm = () => {
           name="topic"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>What should the companion help with?</FormLabel>
+              <FormLabel>What should the study buddy help with?</FormLabel>
               <FormControl>
                 <Input placeholder="Ex. Derivates & Integrals" {...field} />
               </FormControl>
@@ -191,7 +191,7 @@ const CompanionForm = () => {
           name="style"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Companion Personality</FormLabel>
+              <FormLabel>Study Buddy Personality</FormLabel>
               <FormControl>
                 <Select
                   onValueChange={field.onChange}
@@ -344,7 +344,7 @@ const CompanionForm = () => {
         </div>
 
         <Button type="submit" className="w-full cursor-pointer mt-4">
-          🚀 Build Your Companion
+          🚀 Build Your Study Buddy
         </Button>
       </form>
     </Form>

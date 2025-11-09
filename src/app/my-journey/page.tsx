@@ -9,6 +9,10 @@ import CompanionsList from "@/components/CompanionList";
 import ProgressCharts from "@/components/ProgressCharts";
 import LearningStreak from "@/components/LearningStreak";
 import RecentSessions from "@/components/RecentSessions";
+import XPLevelCard from "@/components/XPLevelCard";
+import AchievementBadges from "@/components/AchievementBadges";
+import LeaderboardCard from "@/components/LeaderboardCard";
+
 
 const Profile = async () => {
     const user = await currentUser()
@@ -22,21 +26,21 @@ const Profile = async () => {
         createdAt: s.created_at,
     }));
 
-//     const rawSessions = (await getUserSessions(user.id)).flat();
+    //     const rawSessions = (await getUserSessions(user.id)).flat();
 
-// const sessionHistory = rawSessions.map(s => ({
-//   id: s.id,
-//   companion_id: s.companion_id,
-//   name: s.name || s.companions?.name,
-//   subject: s.subject || s.companions?.subject,
-//   topic: s.topic || s.companions?.topic,
-//   duration: s.duration || s.companions?.duration || 0,
-//   summary: s.summary, // keep summary
-//   takeaways: s.takeaways,
-//   next_steps: s.next_steps,
-//   confidence_score: s.confidence_score,
-//   createdAt: s.created_at,
-// }));
+    // const sessionHistory = rawSessions.map(s => ({
+    //   id: s.id,
+    //   companion_id: s.companion_id,
+    //   name: s.name || s.companions?.name,
+    //   subject: s.subject || s.companions?.subject,
+    //   topic: s.topic || s.companions?.topic,
+    //   duration: s.duration || s.companions?.duration || 0,
+    //   summary: s.summary, // keep summary
+    //   takeaways: s.takeaways,
+    //   next_steps: s.next_steps,
+    //   confidence_score: s.confidence_score,
+    //   createdAt: s.created_at,
+    // }));
 
 
 
@@ -84,7 +88,7 @@ const Profile = async () => {
                             />
                             <p className="text-2xl font-bold">{companions.length}</p>
                         </div>
-                        <div>Companions created</div>
+                        <div>Study Buddy created</div>
                     </div>
                 </div>
             </section>
@@ -111,7 +115,7 @@ const Profile = async () => {
                 </AccordionItem>
                 <AccordionItem value="companions">
                     <AccordionTrigger className="text-2xl font-bold">
-                        My Companions ({companions.length})
+                        My Study Buddy ({companions.length})
                     </AccordionTrigger>
                     <AccordionContent>
                         <CompanionsList
@@ -121,6 +125,12 @@ const Profile = async () => {
                     </AccordionContent>
                 </AccordionItem>
             </Accordion>
+            <section className="grid grid-cols-1 md:grid-cols-3 gap-5 mt-6">
+                <XPLevelCard />
+                <AchievementBadges />
+                <LeaderboardCard />
+            </section>
+
         </main>
     )
 }

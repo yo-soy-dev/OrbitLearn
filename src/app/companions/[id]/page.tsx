@@ -5,6 +5,8 @@ import { currentUser } from "@clerk/nextjs/server";
 import Image from "next/image";
 import { redirect } from "next/navigation";
 import VapiRecorder from "@/components/VapiRecorder";
+// import { getSessionHistory } from "@/lib/actions/companion.actions";
+
 
 
 interface CompanionSessionPageProps {
@@ -13,9 +15,18 @@ interface CompanionSessionPageProps {
 
 
 const CompanionSession = async ({ params }: CompanionSessionPageProps) => {
+
+  console.log('=== COMPANION SESSION DEBUG ===');
+
   const { id } = await params;
   const companion = await getCompanion(id);
+   console.log('📌 Companion ID from URL:', id);
+  console.log('📌 ID Type:', typeof id);
+  console.log('📌 ID Length:', id?.length);
+  console.log('🎯 Companion fetched:', companion);
+
   const user = await currentUser();
+  console.log('👤 User:', user ? `Logged in as ${user.firstName}` : 'No user');
 
   if (!user) redirect('/sign-in');
   if (!companion) redirect('/companions');
@@ -23,7 +34,7 @@ const CompanionSession = async ({ params }: CompanionSessionPageProps) => {
   const { name, subject, title, topic, duration } = companion;
 
   return (
-    <main>
+    <main className="min-h-screen pb-32">
       <article className="flex rounded-border justify-between p-6 max-md:flex-col">
         <div className="flex items-center gap-2">
           <div

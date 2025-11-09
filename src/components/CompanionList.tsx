@@ -23,6 +23,7 @@ interface Companion {
   takeaways?: string[];
   next_steps?: string[];
   confidence_score?: number;
+  exists?: boolean;
 }
 
 interface CompanionsListProps {
@@ -111,11 +112,13 @@ const CompanionsList = ({ title, companions, classNames, onViewSummary }: Compan
 
                 {/* Summary / Confidence */}
                 <TableCell>
-                  {c.summary && c.summary.length > 0 && onViewSummary && (
+                  {c.summary && c.summary.length > 0 
+                  && onViewSummary
+                   && (
                     <div className="flex items-center gap-2">
                       <button
                         onClick={() => router.push(`/viewsummary?id=${c.id}`)}
-                        className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 transition"
+                        className="bg-primary text-white px-3 py-1 rounded hover:bg-primary/80 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200"
                       >
                         🧾 View Summary
                       </button>

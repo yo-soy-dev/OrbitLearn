@@ -1,160 +1,3 @@
-// "use client";
-// import { useState } from "react";
-
-// interface QuizQuestion {
-//   question: string;
-//   options: string[];
-//   answer: string;
-// }
-
-// interface QuizUIProps {
-//   companionId: string;
-// }
-
-
-
-// export default function QuizUI({ companionId }: QuizUIProps) {
-//   const [quiz, setQuiz] = useState<QuizQuestion[] | null>(null);
-//   const [selected, setSelected] = useState<Record<number, string>>({});
-//   const [checked, setChecked] = useState(false);
-//   const [loading, setLoading] = useState(false);
-//   const [error, setError] = useState<string | null>(null);
-
-
-
-//   const generateQuiz = async () => {
-//     if (!companionId) {
-//       setError("Companion ID is required to generate a quiz.");
-//       return;
-//     }
-//     setLoading(true);
-//     setChecked(false);
-//     setSelected({});
-//     setError(null);
-
-//     try{
-//       console.log("📤 Sending request to /api/quiz/generate...");
-//     const res = await fetch("/api/quiz/generate", {
-//       method: "POST",
-//       headers: { "Content-Type": "application/json" },
-//       body: JSON.stringify({
-//         // transcript: "This is a sample transcript to generate questions from.",
-//         companionId
-//       }),
-//     });
-
-//     console.log("📥 Response status:", res.status);
-
-//     const data = await res.json();
-//     console.log("📄 Response JSON:", data);
-//     // setQuiz(data.quiz || []);
-//     // setLoading(false);
-//    if (!res.ok || !data.quiz) {
-//     setError(data.error || "Failed to generate quiz.");
-//     setQuiz([]);
-//   } else {
-//     setQuiz(data.quiz);
-//   }
-// } catch (err: any) {
-//   console.error("❌ generateQuiz error:", err);
-//   setError("An unexpected error occurred: " + err.message);
-//   setQuiz([]);
-// } finally {
-//   setLoading(false);
-// }
-// }
-
-//   const score = quiz
-//     ? quiz.filter((q, i) => selected[i] === q.answer).length
-//     : 0;
-
-//   return (
-//     <div className="max-w-xl mx-auto mt-10 p-6 bg-white rounded-2xl shadow-lg">
-//       <h1 className="text-2xl font-bold mb-4 text-center">AI Quiz Generator</h1>
-
-//       {!quiz && (
-//         <button
-//           onClick={generateQuiz}
-//           className="w-full bg-red-500 text-white py-3 rounded-xl text-lg font-medium hover:bg-red-600 transition"
-//         >
-//           Generate Quiz
-//         </button>
-//       )}
-
-//       {/* ✅ Loading Spinner */}
-//       {loading && (
-//         <p className="text-center py-4 text-gray-600">Generating...</p>
-//       )}
-
-//       {quiz && (
-//         <>
-//           {quiz.map((q, idx) => (
-//             <div key={idx} className="mb-6 p-4 border rounded-xl bg-gray-50">
-//               <h2 className="font-semibold mb-3">
-//                 {idx + 1}. {q.question}
-//               </h2>
-
-//               <div className="grid grid-cols-1 gap-2">
-//                 {q.options.map((opt, i) => {
-//                   const isCorrect = checked && opt === q.answer;
-//                   const isWrong =
-//                     checked && selected[idx] === opt && opt !== q.answer;
-
-//                   return (
-//                     <button
-//                       key={i}
-//                       onClick={() =>
-//                         !checked &&
-//                         setSelected({ ...selected, [idx]: opt })
-//                       }
-//                       className={`
-//                         text-left px-4 py-2 rounded-lg border
-//                         ${isCorrect
-//                           ? "border-green-600 bg-green-100"
-//                           : isWrong
-//                             ? "border-red-600 bg-red-100"
-//                             : selected[idx] === opt
-//                               ? "border-blue-600 bg-blue-100"
-//                               : "border-gray-300"
-//                         }
-//                       `}
-//                     >
-//                       {opt}
-//                     </button>
-//                   );
-//                 })}
-//               </div>
-//             </div>
-//           ))}
-
-//           {!checked && (
-//             <button
-//               onClick={() => setChecked(true)}
-//               className="w-full bg-green-600 text-white py-3 rounded-xl text-lg hover:bg-green-700 transition"
-//             >
-//               Check Answers
-//             </button>
-//           )}
-
-//           {checked && (
-//             <div className="text-center mt-6">
-//               <p className="text-xl font-semibold">
-//                 Your Score: {score} / {quiz.length}
-//               </p>
-
-//               <button
-//                 onClick={() => setQuiz(null)}
-//                 className="mt-4 w-full bg-blue-600 text-white py-3 rounded-xl hover:bg-blue-700 transition"
-//               >
-//                 Generate New Quiz
-//               </button>
-//             </div>
-//           )}
-//         </>
-//       )}
-//     </div>
-//   );
-// }
 
 "use client";
 import { useState } from "react";
@@ -173,6 +16,8 @@ export default function QuizUI() {
   const [difficulty, setDifficulty] = useState("Easy");
   const [subject, setSubject] = useState("Maths");
 
+  const [progress, setProgress] = useState<any>(null);
+
   const generateQuiz = async () => {
     setLoading(true);
     setChecked(false);
@@ -183,8 +28,8 @@ export default function QuizUI() {
       method: "POST",
       body: JSON.stringify({
         transcript: `Generate quiz for ${subject} with difficulty ${difficulty}`,
-          difficulty,
-          subject,
+        difficulty,
+        subject,
       }),
     });
 
@@ -197,62 +42,135 @@ export default function QuizUI() {
     ? quiz.filter((q, i) => selected[i] === q.answer).length
     : 0;
 
+  const handleCheck = async () => {
+    console.log("✅ handleCheck triggered");
+    setChecked(true);
+
+    const calculatedScore = quiz
+      ? quiz.filter((q, i) => selected[i] === q.answer).length
+      : 0;
+
+    console.log("✅ Calculated Score:", calculatedScore);
+    console.log("✅ Total Questions:", quiz?.length || 0);
+    console.log("✅ Difficulty:", difficulty);
+    console.log("✅ Subject:", subject);
+
+    try {
+      console.log("📤 Sending XP update request to /api/gamification/update-progress");
+      const res = await fetch("/api/gamification/update-progress", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          score: calculatedScore,
+          total: quiz?.length || 0,
+          difficulty,
+          subject,
+        }),
+      });
+      console.log("📥 Response received. Status:", res.status);
+
+      const data = await res.json().catch((err) => {
+      console.error("❌ Failed to parse JSON response:", err);
+      return null;
+    });
+
+      if (!data) {
+      console.error("❌ No data returned from API");
+      return;
+    }
+      if (data.success) {
+      console.log("✅ XP Update Success");
+      console.log("✅ XP Earned:", data.xpEarned);
+      console.log("✅ Total XP:", data.totalXP);
+      console.log("✅ Level:", data.level);
+      console.log("✅ Streak:", data.streak);
+
+        setProgress({
+          xp: data.totalXP,
+          xpEarned: data.xpEarned,
+          level: data.level,
+          streak: data.streak,
+        });
+        console.log("✅ progress state updated:", {
+        xp: data.totalXP,
+        xpEarned: data.xpEarned,
+        level: data.level,
+        streak: data.streak,
+      });
+      } else {
+      console.error("❌ XP update failed:", data.message || data);
+    }
+    } catch (err) {
+      console.error("XP update failed:", err);
+    }
+  };
+
+
   return (
-    <div className="max-w-xl mx-auto mt-10 p-6 bg-white rounded-2xl shadow-lg">
-      <h1 className="text-2xl font-bold mb-4 text-center">AI Quiz Generator</h1>
+    <div className="max-w-2xl mx-auto mt-10 p-6 bg-white rounded-3xl shadow-xl border border-gray-200">
+      {progress && (
+        <div className="mb-6 p-4 rounded-2xl bg-yellow-50 border border-yellow-300">
+          <p className="font-semibold text-yellow-800">
+            ⭐ XP Earned: +{progress.xpEarned}
+          </p>
+          <p className="text-yellow-700">🔥 Streak: {progress.streak} days</p>
+          <p className="text-yellow-700">🏆 Level: {progress.level}</p>
+        </div>
+      )}
+      <h1 className="text-3xl font-bold mb-6 text-center bg-gradient-to-r from-primary to-primary bg-clip-text text-transparent">Smart Quiz</h1>
 
       {!quiz && (
-      <div className="flex gap-4 mb-4">
-        {/* Difficulty */}
-        <select
-          value={difficulty}
-          onChange={(e) => setDifficulty(e.target.value)}
-          className="flex-1 p-2 border rounded-lg"
-        >
-          <option>Easy</option>
-          <option>Medium</option>
-          <option>Hard</option>
-        </select>
+        <div className="flex gap-4 mb-4">
+          {/* Difficulty */}
+          <select
+            value={difficulty}
+            onChange={(e) => setDifficulty(e.target.value)}
+            className="flex-1 p-3 border rounded-xl shadow-sm bg-gray-50 text-gray-700"
+          >
+            <option>Easy</option>
+            <option>Medium</option>
+            <option>Hard</option>
+          </select>
 
-        {/* Subject */}
-        <select
-          value={subject}
-          onChange={(e) => setSubject(e.target.value)}
-          className="flex-1 p-2 border rounded-lg"
-        >
-          <option>Maths</option>
-          <option>Economics</option>
-          <option>Language</option>
-          <option>Science</option>
-          <option>History</option>
-          <option>Coding</option>
-          <option>Geography</option>
-          <option>Finance</option>
-          <option>Business</option>
-        </select>
-      </div>
+          {/* Subject */}
+          <select
+            value={subject}
+            onChange={(e) => setSubject(e.target.value)}
+            className="flex-1 p-3 border rounded-xl shadow-sm bg-gray-50 text-gray-700"
+          >
+            <option>Maths</option>
+            <option>Economics</option>
+            <option>Language</option>
+            <option>Science</option>
+            <option>History</option>
+            <option>Coding</option>
+            <option>Geography</option>
+            <option>Finance</option>
+            <option>Business</option>
+          </select>
+        </div>
       )}
 
 
-      
+
       {!quiz && (
         <button
           onClick={generateQuiz}
-          className="w-full bg-red-500 text-white py-3 rounded-xl text-lg font-medium hover:bg-red-600 transition"
+          className="w-full bg-primary text-white py-3 rounded-2xl text-lg font-semibold shadow-md hover:brightness-90 transition"
         >
           Generate Quiz
         </button>
       )}
 
       {loading && (
-        <p className="text-center py-4 text-gray-600">Generating...</p>
+        <p className="text-center py-4 text-gray-500 animate-pulse">Generating questions...</p>
       )}
 
       {quiz && (
         <>
           {quiz.map((q, idx) => (
-            <div key={idx} className="mb-6 p-4 border rounded-xl bg-gray-50">
-              <h2 className="font-semibold mb-3">
+            <div key={idx} className="mb-6 p-5 border rounded-2xl bg-gray-50 hover:shadow-md transition">
+              <h2 className="font-semibold mb-3 text-lg">
                 {idx + 1}. {q.question}
               </h2>
 
@@ -270,15 +188,14 @@ export default function QuizUI() {
                         setSelected({ ...selected, [idx]: opt })
                       }
                       className={`
-                        text-left px-4 py-2 rounded-lg border
-                        ${
-                          isCorrect
-                            ? "border-green-600 bg-green-100"
-                            : isWrong
+                        text-left px-4 py-2 rounded-xl border transition shadow-sm
+                        ${isCorrect
+                          ? "border-yellow-600 bg-yellow-100"
+                          : isWrong
                             ? "border-red-600 bg-red-100"
                             : selected[idx] === opt
-                            ? "border-blue-600 bg-blue-100"
-                            : "border-gray-300"
+                              ? "border-blue-600 bg-blue-100"
+                              : "border-gray-300 bg-white"
                         }
                       `}
                     >
@@ -292,8 +209,9 @@ export default function QuizUI() {
 
           {!checked && (
             <button
-              onClick={() => setChecked(true)}
-              className="w-full bg-green-600 text-white py-3 rounded-xl text-lg hover:bg-green-700 transition"
+              // onClick={() => setChecked(true)}
+                onClick={handleCheck}
+              className="w-full bg-primary text-white py-3 rounded-xl text-lg hover:brightness-90 transition shadow-md"
             >
               Check Answers
             </button>
@@ -301,13 +219,13 @@ export default function QuizUI() {
 
           {checked && (
             <div className="text-center mt-6">
-              <p className="text-xl font-semibold">
+              <p className="text-xl font-bold text-gray-800">
                 Your Score: {score} / {quiz.length}
               </p>
 
               <button
                 onClick={() => setQuiz(null)}
-                className="mt-4 w-full bg-blue-600 text-white py-3 rounded-xl hover:bg-blue-700 transition"
+                className="mt-4 w-full bg-primary text-white py-3 rounded-xl font-semibold hover:brightness-90 transition"
               >
                 Generate New Quiz
               </button>
