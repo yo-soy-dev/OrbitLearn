@@ -142,8 +142,8 @@ export const getRecentSessions = async (limit = 10) => {
 
 
  return data?.map(({ companions, summary, takeaways, next_steps, confidence_score, ...session }) => ({
-   ...companions || {},
    ...session,
+   ...companions  || {},
     summary,
     takeaways,
     next_steps,
