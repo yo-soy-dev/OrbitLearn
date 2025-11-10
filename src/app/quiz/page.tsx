@@ -43,6 +43,7 @@ export default function QuizUI() {
     : 0;
 
   const handleCheck = async () => {
+    if (!quiz) return;
     console.log("✅ handleCheck triggered");
     setChecked(true);
 
@@ -85,6 +86,21 @@ export default function QuizUI() {
       console.log("✅ Level:", data.level);
       console.log("✅ Streak:", data.streak);
 
+       console.log("📤 Checking achievements via /api/gamification/handle-quiz");
+    const res2 = await fetch("/api/gamification/handle-quiz", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        score: calculatedScore,
+        total: quiz.length,
+        difficulty,
+        subject,
+      }),
+    });
+
+    const achievementData = await res2.json();
+    console.log("🏆 Achievements response:", achievementData);
+
         setProgress({
           xp: data.totalXP,
           xpEarned: data.xpEarned,
@@ -96,6 +112,7 @@ export default function QuizUI() {
         xpEarned: data.xpEarned,
         level: data.level,
         streak: data.streak,
+        achievements: achievementData.achievements || [],
       });
       } else {
       console.error("❌ XP update failed:", data.message || data);

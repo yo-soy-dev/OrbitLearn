@@ -17,6 +17,7 @@ export default function LeaderboardCard() {
     const load = async () => {
       const res = await fetch("/api/gamification/leaderboard");
       const data = await res.json();
+      console.log("🏆 Leaderboard fetched:", data); 
       setLeaders(Array.isArray(data) ? data : []);
     };
     load();
@@ -32,7 +33,11 @@ export default function LeaderboardCard() {
             <span className="text-2xl font-bold w-8">{i + 1}</span>
 
             <img
-              src={u.avatar}
+              src={u.avatar || "/icons/avatar-placeholder.png"}
+               onError={(e) => {
+                console.warn("⚠️ Avatar failed:", u);
+                e.currentTarget.src = "/icons/avatar-placeholder.png";
+              }}
               className="w-10 h-10 rounded-full"
             />
 

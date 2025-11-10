@@ -143,15 +143,17 @@ export const getRecentSessions = async (limit = 10) => {
 
  return data?.map(({ companions, summary, takeaways, next_steps, confidence_score, ...session }) => ({
    ...session,
-   ...companions  || {},
+   ...companions || {},
     summary,
     takeaways,
     next_steps,
     confidence_score,
     // companion: companions || null,
 }));
-
 }
+
+
+
 
 
 
@@ -639,4 +641,3 @@ export async function getLeaderboard(limit = 10) {
 
   return leaderboard;
 }
-

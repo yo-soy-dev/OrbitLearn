@@ -18,6 +18,8 @@ export async function GET(
 
     // find session by companionId
     const companion = sessions.find((s) => s.id === companionId);
+    // const companion = sessions.find((s) => s.companion_id === companionId);
+
 
     if (!companion) {
       return NextResponse.json({ error: "Companion not found" }, { status: 404 });

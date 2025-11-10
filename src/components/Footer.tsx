@@ -13,6 +13,15 @@ import {
 } from "lucide-react";
 
 const Footer: FC = () => {
+
+   const socials = [
+    { icon: Facebook, href: "https://www.facebook.com/yourpage" },
+    { icon: Instagram, href: "https://www.instagram.com/yourprofile" },
+    { icon: Twitter, href: "https://x.com/soy_yo_dev40?t=ScXHQU4i0wCgiPWgRLYJjQ&s=09" }, // X (formerly Twitter)
+    { icon: Github, href: "https://github.com/yo-soy-dev" },
+    { icon: Linkedin, href: "https://www.linkedin.com/in/yo-soy-dev" },
+  ]; 
+
   return (
     <footer className="mt-20 bg-background border-t">
       {/* Gradient Top Line */}
@@ -50,21 +59,21 @@ const Footer: FC = () => {
 
             {/* Social Icons */}
             <div className="flex gap-4 mt-5">
-              {[Facebook, Instagram, Twitter, Github, Linkedin].map(
-                (Icon, i) => (
-                  <Link
-                    key={i}
-                    href="/"
-                    className="
-                      hover:text-primary transition 
-                      hover:-translate-y-1 
-                      duration-300
-                    "
-                  >
-                    <Icon className="w-5 h-5" />
-                  </Link>
-                )
-              )}
+              {socials.map(({ icon: Icon, href }, i) => (
+                <Link
+                  key={i}
+                  href={href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="
+                    hover:text-primary transition 
+                    hover:-translate-y-1 
+                    duration-300
+                  "
+                >
+                  <Icon className="w-5 h-5" />
+                </Link>
+              ))}
             </div>
           </div>
 

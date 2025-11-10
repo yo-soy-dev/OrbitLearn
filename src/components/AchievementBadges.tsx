@@ -14,10 +14,30 @@ export default function AchievementBadges() {
 
   useEffect(() => {
     const load = async () => {
-      const res = await fetch("/api/gamification/achievements");
-      const data = await res.json();
-      setBadges(Array.isArray(data) ? data : []);
+      console.log("🎯 Fetching user achievements...");
+      try {
+        const res = await fetch("/api/gamification/achievements");
+
+        if (!res.ok) {
+          console.error("❌ Failed to fetch achievements:", res.status, res.statusText);
+          return;
+        }
+
+        const data = await res.json();
+        console.log("✅ Raw API response:", data);
+
+        if (Array.isArray(data)) {
+          setBadges(data);
+          console.log("🏆 Parsed achievements list:", data);
+        } else {
+          console.warn("⚠️ Response is not an array:", data);
+          setBadges([]);
+        }
+      } catch (err) {
+        console.error("🔥 Error loading achievements:", err);
+      }
     };
+
     load();
   }, []);
 
@@ -27,8 +47,11 @@ export default function AchievementBadges() {
     "7-day-streak",
     "study-master",
     "companion-creator",
-    "fast-learner"
+    "fast-learner",
   ];
+
+  console.log("📋 All possible badges:", allBadges);
+  console.log("🥇 User unlocked badges:", badges.map((b) => b.badge));
 
   return (
     <div className="p-5 bg-white border rounded-2xl shadow-sm">
@@ -36,7 +59,8 @@ export default function AchievementBadges() {
 
       <div className="grid grid-cols-3 gap-4">
         {allBadges.map((badge) => {
-          const unlocked = badges.some(b => b.badge === badge);
+          const unlocked = badges.some((b) => b.badge === badge);
+          console.log(`🔹 Badge "${badge}" is ${unlocked ? "Unlocked ✅" : "Locked 🔒"}`);
 
           return (
             <div

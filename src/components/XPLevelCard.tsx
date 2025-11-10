@@ -15,6 +15,7 @@ export default function XPLevelCard() {
     const load = async () => {
       const res = await fetch("/api/gamification/profile");
       const data = await res.json();
+       console.log("🧩 Profile stats fetched:", data);
       setStats(data);
     };
     load();
@@ -29,6 +30,8 @@ export default function XPLevelCard() {
   const xpNeeded = level * 100;
   const progress = xpNeeded > 0 ? (xp % xpNeeded) / xpNeeded * 100 : 0;
   const xpToNext = xpNeeded - (xp % xpNeeded);
+
+  console.log(`🎯 XP: ${xp}, Level: ${level}, Progress: ${progress}%`);
 
   return (
     <div className="p-5 bg-white border rounded-2xl shadow-sm flex flex-col gap-3">
