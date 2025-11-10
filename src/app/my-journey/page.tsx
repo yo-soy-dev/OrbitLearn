@@ -12,6 +12,7 @@ import RecentSessions from "@/components/RecentSessions";
 import XPLevelCard from "@/components/XPLevelCard";
 import AchievementBadges from "@/components/AchievementBadges";
 import LeaderboardCard from "@/components/LeaderboardCard";
+import Summary from "@/components/Summary";
 
 
 const Profile = async () => {
@@ -124,6 +125,18 @@ const Profile = async () => {
                         />
                     </AccordionContent>
                 </AccordionItem>
+                <AccordionItem value="summary">
+                    <AccordionTrigger className="text-2xl font-bold">
+                        My Lesson Summaries
+                    </AccordionTrigger>
+                    <AccordionContent>
+                        <Summary
+                            title="Lesson Summaries"
+                            companions={sessionHistory}
+                        />
+                    </AccordionContent>
+                </AccordionItem>
+
             </Accordion>
             <section className="grid grid-cols-1 md:grid-cols-3 gap-5 mt-6">
                 <XPLevelCard />

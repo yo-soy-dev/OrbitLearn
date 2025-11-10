@@ -83,7 +83,8 @@ export const getCompanion = async (id: string) => {
   const { data, error } = await supabase
     .from('companions')
     .select()
-    .eq('id', id);
+    .eq('id', id)
+    // .single();
 
   if (error) {
     console.log(error);
@@ -92,6 +93,50 @@ export const getCompanion = async (id: string) => {
   return data?.[0] || null;
 };
 
+// export const getCompanion = async (id: string) => {
+//   const supabase = createSupabaseClient();
+
+//   const { data, error } = await supabase
+//     .from("session_history")
+//     .select(`
+//       id,
+//       created_at,
+//       summary,
+//       takeaways,
+//       next_steps,
+//       confidence_score,
+//       companion_id,
+//       companions:companion_id (
+//         id,
+//         name,
+//         subject,
+//         topic,
+//         style,
+//         voice,
+//         duration
+//       )
+//     `)
+//     .eq("id", id)
+//     .single();
+
+//   console.log("🧩 getCompanion() result:", { id, data, error });
+
+//   if (error) {
+//     console.error("❌ Supabase error in getCompanion:", error);
+//     return null;
+//   }
+
+//   if (!data) {
+//     console.warn("⚠️ No session found for ID:", id);
+//     return null;
+//   }
+
+//   // merge companion fields for convenience
+//   return {
+//     ...data,
+//     ...data.companions,
+//   };
+// };
 
 export const addToSessionHistory = async (companionId: string) => {
   const { userId } = await auth();
@@ -131,13 +176,13 @@ export const getRecentSessions = async (limit = 10) => {
 
 //   return data?.map(({ companions, summary, takeaways, next_steps, confidence_score, ...session }) => ({
 
-//     ...companions || {},
 //     ...session,
+//     ...companions || {},
 //     summary,
 //     takeaways,
 //     next_steps,
 //     confidence_score,
-//     companion: companions || null, 
+//     // companion: companions || null, 
 // }));
 
 
@@ -148,7 +193,7 @@ export const getRecentSessions = async (limit = 10) => {
     takeaways,
     next_steps,
     confidence_score,
-    // companion: companions || null,
+    companion: companions || null,
 }));
 }
 

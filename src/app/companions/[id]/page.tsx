@@ -6,6 +6,8 @@ import Image from "next/image";
 import { redirect } from "next/navigation";
 import VapiRecorder from "@/components/VapiRecorder";
 // import { getSessionHistory } from "@/lib/actions/companion.actions";
+import TestMeButton from "@/components/TestMeButton";
+
 
 
 
@@ -29,13 +31,23 @@ const CompanionSession = async ({ params }: CompanionSessionPageProps) => {
   console.log('👤 User:', user ? `Logged in as ${user.firstName}` : 'No user');
 
   if (!user) redirect('/sign-in');
-  if (!companion) redirect('/companions');
+  // if (!companion) redirect('/companions');
+  if (!companion) {
+  console.error("⚠️ No companion found for ID:", id);
+  return (
+    <div className="p-10 text-center text-red-500">
+      ❌ No session found for this companion. It might have been deleted or you don’t have access.
+    </div>
+  );
+}
+
 
   const { name, subject, title, topic, duration } = companion;
 
   return (
     <main className="min-h-screen pb-32">
-      <article className="flex rounded-border justify-between p-6 max-md:flex-col">
+      <TestMeButton />
+      <article className="flex items-center rounded-border justify-between p-6 max-md:flex-col gap-4">
         <div className="flex items-center gap-2">
           <div
             className="size-[72px] flex items-center justify-center rounded-lg max-md:hidden"
@@ -64,6 +76,7 @@ const CompanionSession = async ({ params }: CompanionSessionPageProps) => {
           </div>
         </div>
       </article>
+        
       <CompanionComponent
         {...companion}
         companionId={id}

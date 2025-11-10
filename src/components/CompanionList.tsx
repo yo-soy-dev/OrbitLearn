@@ -15,6 +15,7 @@ import { useRouter } from "next/navigation";
 
 interface Companion {
   id: string;
+   companion_id?: string;
   subject: string;
   name: string;
   topic: string;
@@ -45,7 +46,7 @@ const CompanionsList = ({ title, companions, classNames, onViewSummary }: Compan
             <TableHead className="text-lg">Subject</TableHead>
             <TableHead className="text-lg">Topic</TableHead>
             <TableHead className="text-right text-lg">Duration</TableHead>
-            <TableHead className="text-left text-lg">Summary</TableHead>
+            {/* <TableHead className="text-left text-lg">Summary</TableHead> */}
           </TableRow>
         </TableHeader>
 
@@ -55,7 +56,8 @@ const CompanionsList = ({ title, companions, classNames, onViewSummary }: Compan
               <TableRow key={`${c.id}-${index}`}>
                 {/* Lessons */}
                 <TableCell>
-                  <Link href={`/companions/${c.id}`}>
+                  {/* <Link href={`/companions/${c.id}`}> */}
+                  <Link href={`/companions/${c.companion_id || c.id}`}>
                     <div className="flex items-center gap-2">
                       <div
                         className="size-[72px] flex items-center justify-center rounded-lg max-md:hidden"
@@ -111,8 +113,8 @@ const CompanionsList = ({ title, companions, classNames, onViewSummary }: Compan
                 </TableCell>
 
                 {/* Summary / Confidence */}
-                <TableCell>
-                  {c.summary && c.summary.length > 0 
+                {/* <TableCell> */}
+                  {/* {c.summary && c.summary.length > 0 
                   && onViewSummary
                    && (
                     <div className="flex items-center gap-2">
@@ -138,7 +140,7 @@ const CompanionsList = ({ title, companions, classNames, onViewSummary }: Compan
                       )}
                     </div>
                   )}
-                </TableCell>
+                </TableCell> */}
                 {/* <TableCell>
                   {c.summary && c.summary.length > 0
                     ? c.summary.join(", ") // renders all points
