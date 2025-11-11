@@ -1,9 +1,14 @@
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
-import { createSupabaseClient } from "@/lib/supabase";
+import { createClient } from "@supabase/supabase-js";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET!;
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY! // ✅ must be service role key
+);
 
 export async function POST(req: Request) {
   const body = await req.text();
@@ -23,9 +28,6 @@ export async function POST(req: Request) {
     const { user_id, plan } = session.metadata || {};
 
     if (user_id && plan) {
-      const supabase = createSupabaseClient();
-
-      // 1-month plan expiry from now
       const expiryDate = new Date();
       expiryDate.setMonth(expiryDate.getMonth() + 1);
 
