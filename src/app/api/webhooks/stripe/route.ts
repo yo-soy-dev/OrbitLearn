@@ -33,7 +33,7 @@ export async function POST(req: Request) {
         .from("users")
         .update({
           plan,
-          plan_expires_at: expiryDate.toISOString(),
+          expired_at: expiryDate.toISOString(),
         })
         .eq("id", user_id);
 
