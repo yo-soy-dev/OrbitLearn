@@ -232,37 +232,32 @@ export const getUserCompanions = async (userId: string) => {
 
 export const newCompanionPermissions = async () => {
   const { userId } = await auth();
-  const supabase = createSupabaseClient();
+  const supabase = createSupabaseClient(true);
 
   const { data: user, error } = await supabase
     .from("users")
-    .select("plan, subscription_start")
+    .select("plan, expired_at")
     .eq("id", userId)
     .single();
 
-    console.log("DEBUG: newCompanionPermissions userId =", userId);
+  console.log("DEBUG: newCompanionPermissions userId =", userId);
 
-
-  if (error) {
-    console.error("User not found or DB error:", error);
+  if (error || !user) {
+    console.error("❌ User not found or DB error:", error);
     return false;
   }
 
-  const plan = user?.plan || "free";
-  const startDate = user?.subscription_start
-    ? new Date(user.subscription_start)
-    : null;
-
+  const plan = user.plan || "free";
+  const expiryDate = user.expired_at ? new Date(user.expired_at) : null;
   const now = new Date();
-  const active =
-    startDate && now.getTime() - startDate.getTime() < 30 * 24 * 60 * 60 * 1000;
 
-  if (plan === "pro" && active) return true;
-  if (plan === "core" && active) return true;
-  if (plan === "free") return true;
+  const active = expiryDate && now < expiryDate;
+
+  // ✅ Plan validity logic
+  if ((plan === "pro" || plan === "core") && active) return true;
+  if (plan === "free") return false; // free users must upgrade
   return false;
 };
-
 
 
 

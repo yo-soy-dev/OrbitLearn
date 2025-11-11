@@ -16,10 +16,10 @@ const NewCompanion = async () => {
           <h1>Study Buddy Builder</h1>
           <CompanionForm />
         </article>
-      ) : (
-        <article className="companion-limit text-center">
-          <Image
-            src="/images/limit.svg"
+       ) : ( 
+      <article className="companion-limit text-center">
+           <Image 
+             src="/images/limit.svg"
             alt="Companion limit reached"
             width={360}
             height={230}
@@ -34,7 +34,7 @@ const NewCompanion = async () => {
             Upgrade My Plan
           </Link>
         </article> 
-      )}
+    )}
     </main>
   );
 };
