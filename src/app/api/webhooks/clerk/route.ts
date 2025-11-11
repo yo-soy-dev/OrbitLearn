@@ -1,61 +1,101 @@
-import { NextResponse } from "next/server";
+// import { Webhook } from "svix";
+// import { headers } from "next/headers";
+// import { NextResponse } from "next/server";
+// import { createSupabaseClient } from "@/lib/supabase";
+
+// const WEBHOOK_SECRET = process.env.CLERK_WEBHOOK_SECRET!;
+
+// export async function POST(req: Request) {
+//   const payload = await req.text();
+//   const headerList = await headers();
+
+//   const svix_id = headerList.get("svix-id");
+//   const svix_timestamp = headerList.get("svix-timestamp");
+//   const svix_signature = headerList.get("svix-signature");
+
+//   if (!svix_id || !svix_timestamp || !svix_signature)
+//     return new Response("Missing svix headers", { status: 400 });
+
+//   let evt: { type: string; data: any };
+//   try {
+//     const wh = new Webhook(WEBHOOK_SECRET);
+//     evt = wh.verify(payload, {
+//       "svix-id": svix_id,
+//       "svix-timestamp": svix_timestamp,
+//       "svix-signature": svix_signature,
+//     }) as { type: string; data: any };
+//   } catch (err) {
+//     console.error("❌ Clerk webhook verification failed:", err);
+//     return new Response("Invalid signature", { status: 400 });
+//   }
+
+//   if (evt.type === "user.created") {
+//     const { id } = evt.data;
+//     const supabase = createSupabaseClient();
+
+//     const { error } = await supabase.from("users").insert({
+//       id,
+//       plan: "free",
+//       created_at: new Date().toISOString(),
+//     });
+
+//     if (error) console.error("❌ Supabase insert failed:", error);
+//     else console.log(`✅ Added Clerk user ${id} to Supabase`);
+//   }
+
+//   return NextResponse.json({ success: true });
+// }
+
 import { Webhook } from "svix";
 import { headers } from "next/headers";
+import { NextResponse } from "next/server";
 import { createSupabaseClient } from "@/lib/supabase";
-import { createClerkClient } from "@clerk/backend";
 
 const WEBHOOK_SECRET = process.env.CLERK_WEBHOOK_SECRET!;
-const CLERK_SECRET_KEY = process.env.CLERK_SECRET_KEY!;
-
-const clerk = createClerkClient({ secretKey: CLERK_SECRET_KEY });
 
 export async function POST(req: Request) {
   const payload = await req.text();
-  const headerList = await headers();
+  const headerList = await headers(); // ❌ no need to `await headers()`, it’s synchronous
 
   const svix_id = headerList.get("svix-id");
   const svix_timestamp = headerList.get("svix-timestamp");
   const svix_signature = headerList.get("svix-signature");
 
   if (!svix_id || !svix_timestamp || !svix_signature) {
-    return new Response("Missing Svix headers", { status: 400 });
+    return new Response("Missing svix headers", { status: 400 });
   }
 
+  const wh = new Webhook(WEBHOOK_SECRET);
   let evt: any;
+
   try {
-    const wh = new Webhook(WEBHOOK_SECRET);
     evt = wh.verify(payload, {
       "svix-id": svix_id,
       "svix-timestamp": svix_timestamp,
       "svix-signature": svix_signature,
     });
   } catch (err) {
-    console.error("❌ Webhook verification failed:", err);
+    console.error("❌ Clerk webhook verification failed:", err);
     return new Response("Invalid signature", { status: 400 });
   }
 
-  const eventType = evt.type;
+  const supabase = createSupabaseClient();
 
-  if (eventType === "subscription.created" || eventType === "subscription.updated") {
-    const userId = evt.data.user_id;
-    const plan = evt.data.plan_id || "free";
+  // Handle both creation and update (optional)
+  if (evt.type === "user.created" || evt.type === "user.updated") {
+    const { id } = evt.data;
 
-    const supabase = createSupabaseClient();
-
-    const { error} = await supabase.from("users").update({ plan }).eq("id", userId);
-
-    if (error) console.error("Supabase update failed:", error);
-
-    try {
-    await clerk.users.updateUserMetadata(userId, {
-      publicMetadata: { plan },
+    const { error } = await supabase.from("users").upsert({
+      id,
+      plan: "basic", // ✅ better default name (matches your pricing plans)
+      created_at: new Date().toISOString(),
     });
-    } catch (err) {
-    console.error("Clerk metadata update failed:", err);
-  }
 
-
-    console.log(`✅ Updated user ${userId} plan to ${plan}`);
+    if (error) {
+      console.error("❌ Supabase insert failed:", error);
+    } else {
+      console.log(`✅ Synced Clerk user ${id} to Supabase`);
+    }
   }
 
   return NextResponse.json({ success: true });

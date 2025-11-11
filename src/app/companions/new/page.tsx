@@ -7,17 +7,17 @@ import { redirect } from "next/navigation";
 
 const NewCompanion = async () => {
   const { userId } = await auth();
-  // const hasPermission = await newCompanionPermissions();
+  const hasPermission = await newCompanionPermissions();
 
   return (
     <main className="min-lg:w-1/3 min-md:w-2/3 mx-auto flex flex-col items-center justify-center pb-16">
-      {/* {hasPermission ? ( */}
+      {hasPermission ? (
          <article className="w-full gap-4 flex flex-col">
           <h1>Study Buddy Builder</h1>
           <CompanionForm />
         </article>
-      {/* ) : ( */}
-        {/* <article className="companion-limit text-center">
+      ) : (
+        <article className="companion-limit text-center">
           <Image
             src="/images/limit.svg"
             alt="Companion limit reached"
@@ -30,11 +30,11 @@ const NewCompanion = async () => {
             You've reached your companion limit. Upgrade to create more
             companions and unlock premium features.
           </p>
-          <Link href="/subscription" className="btn-primary w-full justify-center">
+          <Link href="/pricing" className="btn-primary w-full justify-center">
             Upgrade My Plan
           </Link>
-        </article>  */}
-      {/* )} */}
+        </article> 
+      )}
     </main>
   );
 };

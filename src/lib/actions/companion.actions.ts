@@ -93,51 +93,6 @@ export const getCompanion = async (id: string) => {
   return data?.[0] || null;
 };
 
-// export const getCompanion = async (id: string) => {
-//   const supabase = createSupabaseClient();
-
-//   const { data, error } = await supabase
-//     .from("session_history")
-//     .select(`
-//       id,
-//       created_at,
-//       summary,
-//       takeaways,
-//       next_steps,
-//       confidence_score,
-//       companion_id,
-//       companions:companion_id (
-//         id,
-//         name,
-//         subject,
-//         topic,
-//         style,
-//         voice,
-//         duration
-//       )
-//     `)
-//     .eq("id", id)
-//     .single();
-
-//   console.log("🧩 getCompanion() result:", { id, data, error });
-
-//   if (error) {
-//     console.error("❌ Supabase error in getCompanion:", error);
-//     return null;
-//   }
-
-//   if (!data) {
-//     console.warn("⚠️ No session found for ID:", id);
-//     return null;
-//   }
-
-//   // merge companion fields for convenience
-//   return {
-//     ...data,
-//     ...data.companions,
-//   };
-// };
-
 export const addToSessionHistory = async (companionId: string) => {
   const { userId } = await auth();
   const supabase = createSupabaseClient();
@@ -173,17 +128,6 @@ export const getRecentSessions = async (limit = 10) => {
     .limit(limit);
 
   if (error) throw new Error(error.message);
-
-//   return data?.map(({ companions, summary, takeaways, next_steps, confidence_score, ...session }) => ({
-
-//     ...session,
-//     ...companions || {},
-//     summary,
-//     takeaways,
-//     next_steps,
-//     confidence_score,
-//     // companion: companions || null, 
-// }));
 
 
  return data?.map(({ companions, summary, takeaways, next_steps, confidence_score, ...session }) => ({
@@ -286,32 +230,39 @@ export const getUserCompanions = async (userId: string) => {
 
 
 
-
-
 export const newCompanionPermissions = async () => {
   const { userId } = await auth();
   const supabase = createSupabaseClient();
 
-  const { data: user } = await supabase
+  const { data: user, error } = await supabase
     .from("users")
-    .select("plan")
+    .select("plan, subscription_start")
     .eq("id", userId)
     .single();
 
+    console.log("DEBUG: newCompanionPermissions userId =", userId);
+
+
+  if (error) {
+    console.error("User not found or DB error:", error);
+    return false;
+  }
+
   const plan = user?.plan || "free";
-  const { data: companions } = await supabase
-    .from("companions")
-    .select("id")
-    .eq("author", userId);
+  const startDate = user?.subscription_start
+    ? new Date(user.subscription_start)
+    : null;
 
-  const count = companions?.length || 0;
+  const now = new Date();
+  const active =
+    startDate && now.getTime() - startDate.getTime() < 30 * 24 * 60 * 60 * 1000;
 
-  if (plan === "pro") return true;
-  if (plan === "core" && count < 3) return true;
-  if (plan === "free" && count < 1) return true;
-
+  if (plan === "pro" && active) return true;
+  if (plan === "core" && active) return true;
+  if (plan === "free") return true;
   return false;
 };
+
 
 
 
@@ -686,3 +637,4 @@ export async function getLeaderboard(limit = 10) {
 
   return leaderboard;
 }
+
