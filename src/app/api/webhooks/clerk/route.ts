@@ -45,7 +45,7 @@ export async function POST(req: Request) {
 
   console.log("✅ Clerk Event Received:", evt.type);
 
-  const supabase = createSupabaseClient();
+  const supabase = createSupabaseClient(true);
 
   if (evt.type === "user.created" || evt.type === "user.updated") {
     const { id, email_addresses, first_name, last_name } = evt.data;
