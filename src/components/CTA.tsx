@@ -41,21 +41,21 @@ const Cta = () => {
         through voice conversations that feel natural and fun.
       </p>
       <Image src="images/cta.svg" alt="cta" width={362} height={232} />
-      {/* <button className="btn-primary">
+      <button className="btn-primary">
         <Image src="/icons/plus.svg" alt="plus" width={12} height={12} />
         <Link href="/companions/new">
           <p>Build a New Study Buddy</p>
         </Link>
-      </button> */}
-      <button
+      </button>
+      {/* <button
         onClick={handleBuildClick}
         className="btn-primary mt-6 flex items-center gap-2 justify-center"
         disabled={loading}
       >
         <Image src="/icons/plus.svg" alt="plus" width={12} height={12} />
         <p>{loading ? "Checking..." : "Build a New Study Buddy"}</p>
-      </button>
-    </section>
+      </button> */}
+    </section> 
   );
 };
 
