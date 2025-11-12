@@ -12,8 +12,8 @@ export async function POST(req: Request) {
     if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const planPrices: Record<string, number> = {
-      core: 1900, // $19.00
-      pro: 3900,  // $39.00
+      core: 1900, // $19
+      pro: 3900,  // $39
     };
 
     const session = await stripe.checkout.sessions.create({

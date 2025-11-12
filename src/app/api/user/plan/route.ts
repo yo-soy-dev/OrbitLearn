@@ -4,22 +4,21 @@ import { NextResponse } from "next/server";
 
 export async function GET() {
   const { userId } = await auth();
-  if (!userId) return NextResponse.json({ active: false });
+  if (!userId) return NextResponse.json({ plan: "free", active: false });
 
   const supabase = createSupabaseClient(true);
 
   const { data: user, error } = await supabase
     .from("users")
     .select("plan, expired_at")
-    .eq("id", userId)
+    .eq("id", userId) // ✅ 'id' is your column name
     .single();
 
-  if (error || !user) return NextResponse.json({ active: false });
+  if (error || !user) return NextResponse.json({ plan: "free", active: false });
 
   const now = new Date();
   const expiry = user.expired_at ? new Date(user.expired_at) : null;
-  const active =
-    expiry && now < expiry && (user.plan === "core" || user.plan === "pro");
+  const active = expiry && now < expiry && (user.plan === "core" || user.plan === "pro");
 
-  return NextResponse.json({ active });
+  return NextResponse.json({ plan: user.plan, active });
 }

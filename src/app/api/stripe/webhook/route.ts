@@ -7,7 +7,7 @@ const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET!;
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY! // ✅ must be service role key
+  process.env.SUPABASE_SERVICE_ROLE_KEY! // ✅ Use service key
 );
 
 export async function POST(req: Request) {
@@ -37,8 +37,7 @@ export async function POST(req: Request) {
           plan,
           expired_at: expiryDate.toISOString(),
         })
-        .eq("id", user_id);
-
+        .eq("id", user_id); 
       if (error) {
         console.error("❌ Supabase update failed:", error);
       } else {
