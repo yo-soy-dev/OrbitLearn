@@ -51,14 +51,37 @@ export async function POST(req: Request) {
     const { id, email_addresses, first_name, last_name } = evt.data;
     const email = email_addresses?.[0]?.email_address || "";
 
-    const { error } = await supabase.from("users").upsert({
+     const { data: existingUser } = await supabase
+      .from("users")
+      .select("id, plan")
+      .eq("id", id)
+      .single();
+
+      const updates: Record<string, any> = {
       id,
       email,
       first_name,
       last_name,
-      plan: "free",
-      created_at: new Date().toISOString(),
+    };
+
+    if (!existingUser) {
+      updates.plan = "free";
+      updates.created_at = new Date().toISOString();
+    }
+
+    const { error } = await supabase.from("users").upsert(updates, {
+      onConflict: "id",
     });
+
+
+    // const { error } = await supabase.from("users").upsert({
+    //   id,
+    //   email,
+    //   first_name,
+    //   last_name,
+    //   plan: "free",
+    //   created_at: new Date().toISOString(),
+    // });
 
     if (error) {
       console.error("❌ Supabase insert failed:", error.message);
@@ -66,6 +89,19 @@ export async function POST(req: Request) {
     }
 
     console.log(`✅ User synced to Supabase: ${email}`);
+  }
+
+  if (evt.type === "user.deleted") {
+    const { id } = evt.data;
+
+    const { error } = await supabase.from("users").delete().eq("id", id);
+
+    if (error) {
+      console.error("❌ Supabase delete failed:", error.message);
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
+    console.log(`🗑️ User ${id} deleted from Supabase`);
   }
 
   return NextResponse.json({ success: true });

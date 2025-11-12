@@ -29,7 +29,7 @@ export async function POST(req: Request) {
           quantity: 1,
         },
       ],
-      success_url: `${process.env.NEXT_PUBLIC_APP_URL}/companions/new?success=true`,
+      success_url: `${process.env.NEXT_PUBLIC_APP_URL}/?success=true`,
       cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/pricing?canceled=true`,
       metadata: { user_id: userId, plan },
     });
