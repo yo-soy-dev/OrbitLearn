@@ -7,23 +7,28 @@ import React from "react";
 import { getAllCompanions, getRecentSessions } from "@/lib/actions/companion.actions";
 import { getSubjectColor } from "@/lib/utils";
 import RecentSessions from "@/components/RecentSessions";
+import WelcomeBox from "@/components/WelcomeBox";
+import QuizBox from "@/components/QuizBox";
 // import { Companion } from "@/types";
 
 const Page = async () => {
   const companions = await getAllCompanions({ limit: 3 }); 
     const recentSessionsCompanions = await getRecentSessions(10)
-    // const rawSessions = (await getUserSessions(user.id)).flat();
-    
-    //     const sessionHistory = rawSessions.map(s => ({
-    //         ...s,
-    //         createdAt: s.created_at,
-    //     }));
 
   
   return (
     <div className="max-w-7xl mx-auto px-6 pb-20">
+      <WelcomeBox />
+
+      {/* <section className="home-section mt-8 flex justify-between items-stretch gap-6">
+       */}<section className="home-section mt-6 mb-10">
+        <QuizBox />
+      </section>
+
+
+      <section className="space-y-4 mt-10">
+
       <h1 className="text-2xl underline">Popular Study Buddy</h1>
-      
       <section className="home-section">
         {companions.map((companion) => (  
                     <CompanionCard  
@@ -57,8 +62,9 @@ const Page = async () => {
           color="#BDE7FF"
         /> */}
       </section>
+      </section>
 
-      <section className="home-section mt-8 flex justify-between items-stretch gap-6">
+        <section className="home-section mt-8 flex justify-between items-stretch gap-6">
         {/* <CompanionList
           title="Recently completed sessions"
           companions={recentSessionsCompanions as Companion[]}
@@ -66,7 +72,7 @@ const Page = async () => {
         /> */}
          <RecentSessions sessions={recentSessionsCompanions as Companion[]} 
         //  classNames="w-2/3 max-lg:w-full"
-          />
+           /> 
         <CTA />
       </section>
     </div>

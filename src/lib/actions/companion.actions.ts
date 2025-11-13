@@ -563,73 +563,39 @@ export async function unlockAchievement(badge: string) {
   return data;
 }
 
-// export async function getLeaderboard(limit = 10) {
-//   const supabase = createSupabaseClient();
-
-//   const { data, error } = await supabase
-//     .from("user_stats")
-//     .select(`
-//       user_id,
-//       xp,
-//       level,
-//       users:user_id (
-//         first_name,
-//         last_name,
-//         image_url
-//       )
-//     `)
-//     .order("xp", { ascending: false })
-//     .limit(limit);
-
-//   if (error) {
-//     console.error("❌ Error fetching leaderboard:", error);
-//     throw new Error(error.message);
-//   }
-
-//   return (data || []).map((d) => {
-//     const user = Array.isArray(d.users) ? d.users[0] : null;
-//     return {
-//       user_id: d.user_id,
-//       xp: d.xp,
-//       level: d.level,
-//       name: `${user?.first_name || ""} ${user?.last_name || ""}`,
-//       avatar: user?.image_url || "/icons/avatar-placeholder.png",
-//     };
-//   });
-// }
-
 export async function getLeaderboard(limit = 10) {
   const supabase = createSupabaseClient();
 
   const { data: stats, error } = await supabase
     .from("user_stats")
-    .select("*")
+    .select("user_id, xp, level")
     .order("xp", { ascending: false })
     .limit(limit);
 
-  if (error) {
+  if (error || !stats) {
     console.error("❌ Error fetching leaderboard:", error);
     return [];
   }
 
-  const leaderboard = await Promise.all(
-    stats.map(async (stat) => {
-      const { data: user } = await supabase
-        .from("users")
-        .select("first_name, last_name, image_url")
-        .eq("id", stat.user_id)
-        .maybeSingle();
+  const userIds = stats.map((s) => s.user_id);
 
-      return {
-        user_id: stat.user_id,
-        xp: stat.xp,
-        level: stat.level,
-        name: `${user?.first_name || ""} ${user?.last_name || ""}`,
-        avatar: user?.image_url || "/icons/avatar-placeholder.png",
-      };
-    })
-  );
+  const { data: users } = await supabase
+    .from("users")
+    .select("id, first_name, last_name, image_url")
+    .in("id", userIds);
+
+  const userMap = new Map(users?.map((u) => [u.id, u]) || []);
+
+  const leaderboard = stats.map((s) => {
+    const user = userMap.get(s.user_id);
+    return {
+      user_id: s.user_id,
+      xp: s.xp,
+      level: s.level,
+      name: `${user?.first_name || ""} ${user?.last_name || ""}`.trim() || "Anonymous",
+      avatar: user?.image_url || "/icons/avatar-placeholder.png",
+    };
+  });
 
   return leaderboard;
 }
-

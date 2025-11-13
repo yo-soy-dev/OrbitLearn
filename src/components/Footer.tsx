@@ -23,7 +23,14 @@ const Footer: FC = () => {
   ]; 
 
   return (
-    <footer className="mt-20 bg-background border-t">
+    // <footer className="mt-20 bg-background border-t">
+     <footer 
+      className="
+         mt-20 
+         bg-gradient-to-b from-[#e8fbe8] via-[#d5f9d5] to-[#c1f0c1] 
+         border-t border-green-200
+         text-gray-800
+     ">
       {/* Gradient Top Line */}
       {/* <div className="h-1 w-full bg-gradient-to-r from-primary/80 via-pink-500 to-purple-600"></div> */}
 

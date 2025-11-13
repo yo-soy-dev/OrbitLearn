@@ -178,7 +178,8 @@ body {
     @apply bg-primary text-white rounded-xl cursor-pointer px-4 py-2 flex items-center gap-2;
   }
   .navbar {
-    @apply flex flex-wrap items-center justify-between mx-auto w-full px-6 py-4 bg-white sm:px-4;
+    @apply flex flex-wrap items-center justify-between mx-auto w-full px-6 py-4 bg-white sm:px-4 
+    bg-gradient-to-r from-[#e8fbe8] via-[#d5f9d5] to-[#c1f0c1];
   }
   .btn-signin {
     @apply border border-black rounded-4xl px-4 py-2.5 text-sm font-semibold flex items-center gap-2 cursor-pointer;

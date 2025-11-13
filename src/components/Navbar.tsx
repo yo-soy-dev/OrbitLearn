@@ -12,7 +12,8 @@ import {
 
 const Navbar = () => {
   return (
-    <nav className="navbar">
+    <nav className="navbar shadow-sm border-b border-green-200">
+    {/* // <nav className="navbar shadow-sm border-b border-green-200"> */}
       <Link href="/">
         <div className="flex items-center gap-2.5 cursor-pointer">
           <div className="relative w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14">

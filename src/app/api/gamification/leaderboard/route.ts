@@ -7,7 +7,6 @@ export async function GET(req: Request) {
     const limit = Number(url.searchParams.get("limit")) || 10;
 
     const leaderboard = await getLeaderboard(limit);
-    // ✅ Return array directly (frontend expects array)
     return NextResponse.json(leaderboard || []);
   } catch (error: any) {
     console.error("❌ /leaderboard Error:", error);

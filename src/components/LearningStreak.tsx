@@ -63,7 +63,7 @@ export default function LearningStreak({ companionList }: Props) {
                 {todayLearned ? (
                     <span className="text-green-600 font-semibold">✓ Learned Today</span>
                 ) : (
-                    <span className="text-red-500 font-semibold">Not yet today</span>
+                    <span className="text-green-600 font-semibold">Not yet today</span>
                 )}
             </div>
 
