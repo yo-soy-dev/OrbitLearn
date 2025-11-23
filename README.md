@@ -1,4 +1,4 @@
-# Orbitlearn
+# ORBITLEARN
 
 Orbitlearn is a full-featured LMS (Learning Management System) SaaS application built with **Next.js**, **Supabase**, and **Stripe**. It provides real-time interactive teaching sessions powered by **Vapi**, an AI vocal agent for voice-driven interactions, and AI-driven quiz generation + automated session summaries using the **OpenAI** API. Post-session emails are sent with **Brevo (Sendinblue)** and **Nodemailer** where appropriate. Orbitlearn is designed for multi-tenant SaaS usage with subscription management, secure authentication, and modern developer DX.
 
