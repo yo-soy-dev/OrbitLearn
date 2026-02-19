@@ -153,7 +153,7 @@ You'll need accounts for:
 
 **1 — Clone**
 ```bash
-git clone https://github.com/<your-org>/orbitlearn.git
+git clone https://github.com/yo-soy-dev/OrbitLearn.git
 cd orbitlearn
 ```
 
