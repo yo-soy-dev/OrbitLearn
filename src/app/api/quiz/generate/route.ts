@@ -6,7 +6,7 @@ const apiKey = process.env.OPENAI_API_KEY!;
 console.log("🔑 Loaded API Key:", apiKey ? "YES" : "NO");
 
 const genAI = new GoogleGenerativeAI(apiKey);
-const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
 console.log("🔑 API KEY (first 10 chars):", apiKey?.slice(0, 10));
 
