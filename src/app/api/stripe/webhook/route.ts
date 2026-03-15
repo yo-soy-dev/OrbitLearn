@@ -36,6 +36,7 @@ export async function POST(req: Request) {
         .update({
           plan,
           expired_at: expiryDate.toISOString(),
+          stripe_id: session.customer as string,
         })
         .eq("id", user_id); 
       if (error) {
