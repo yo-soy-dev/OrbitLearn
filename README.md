@@ -1,226 +1,433 @@
-# Orbitlearn
+<!--
+  ██████╗ ██████╗ ██████╗ ██╗████████╗██╗     ███████╗ █████╗ ██████╗ ███╗   ██╗
+ ██╔═══██╗██╔══██╗██╔══██╗██║╚══██╔══╝██║     ██╔════╝██╔══██╗██╔══██╗████╗  ██║
+ ██║   ██║██████╔╝██████╔╝██║   ██║   ██║     █████╗  ███████║██████╔╝██╔██╗ ██║
+ ██║   ██║██╔══██╗██╔══██╗██║   ██║   ██║     ██╔══╝  ██╔══██║██╔══██╗██║╚██╗██║
+ ╚██████╔╝██║  ██║██████╔╝██║   ██║   ███████╗███████╗██║  ██║██║  ██║██║ ╚████║
+  ╚═════╝ ╚═╝  ╚═╝╚═════╝ ╚═╝   ╚═╝   ╚══════╝╚══════╝╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═══╝
+-->
 
-Orbitlearn is a full-featured LMS (Learning Management System) SaaS application built with **Next.js**, **Supabase**, and **Stripe**. It provides real-time interactive teaching sessions powered by **Vapi**, an AI vocal agent for voice-driven interactions, and AI-driven quiz generation + automated session summaries using the **OpenAI** API. Post-session emails are sent with **Brevo (Sendinblue)** and **Nodemailer** where appropriate. Orbitlearn is designed for multi-tenant SaaS usage with subscription management, secure authentication, and modern developer DX.
+<div align="center">
 
----
+```
+ ○  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ○
+ ·                                                                               ·
+ ·        🪐  O R B I T L E A R N                                               ·
+ ·            ─────────────────────────────────────                             ·
+ ·            Teaching at the speed of thought.                                 ·
+ ·                                                                               ·
+ ○  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ○
+```
 
-## Table of contents
+[![Next.js](https://img.shields.io/badge/Next.js_14-000000?style=for-the-badge&logo=next.js&logoColor=white)](https://nextjs.org)
+[![Supabase](https://img.shields.io/badge/Supabase-1C1C1C?style=for-the-badge&logo=supabase&logoColor=3ECF8E)](https://supabase.com)
+[![Stripe](https://img.shields.io/badge/Stripe-1C1C1C?style=for-the-badge&logo=stripe&logoColor=635BFF)](https://stripe.com)
+[![OpenAI](https://img.shields.io/badge/OpenAI-1C1C1C?style=for-the-badge&logo=openai&logoColor=white)](https://openai.com)
+[![Sentry](https://img.shields.io/badge/Sentry-1C1C1C?style=for-the-badge&logo=sentry&logoColor=FB4226)](https://sentry.io)
+[![MIT](https://img.shields.io/badge/License_MIT-1C1C1C?style=for-the-badge)](LICENSE)
 
-* [Key features](#key-features)
-* [Tech stack](#tech-stack)
-* [High-level architecture](#high-level-architecture)
-* [Setup (Developer)](#setup-developer)
-* [Environment variables](#environment-variables)
-* [Database & models](#database--models)
-* [Authentication & Authorization](#authentication--authorization)
-* [Subscriptions & Payments](#subscriptions--payments)
-* [Real-time sessions with Vapi](#real-time-sessions-with-vapi)
-* [AI features](#ai-features)
-* [Email notifications](#email-notifications)
-* [Deployment](#deployment)
-* [Testing & CI](#testing--ci)
-* [Roadmap / Future features](#roadmap--future-features)
-* [Contributing](#contributing)
-* [License](#license)
+**[What It Does](#-what-it-does) · [Under the Hood](#-under-the-hood) · [Spin It Up](#-spin-it-up) · [Schema](#-data-schema) · [Roadmap](#-whats-next)**
 
----
-
-## Key features
-
-* User sign-up / sign-in with Supabase Auth
-* Tiered subscriptions handled via Stripe (free / pro / team)
-* Real-time video/audio teaching sessions (Vapi) with session recording and attendance
-* AI vocal agent for voice-enabled tutors / assistants
-* Automatic quiz generation using OpenAI from course content
-* Post-session summary generation (OpenAI) and email delivery (Brevo + Nodemailer)
-* Interactive quizzes and in-session polls
-* Admin dashboard for course, session, and user management
-* Webhooks for Stripe, Supabase realtime events, and Vapi events
-
-## Tech stack
-
-* Frontend: Next.js (App Router), React, Tailwind CSS
-* Backend: Next.js API Routes / Server Actions, Supabase (Postgres + Realtime + Storage)
-* Payments: Stripe (Checkout + Webhooks)
-* Realtime/RTC: Vapi (session signaling, room management, optional SFU)
-* AI: OpenAI (GPT models) for quiz generation and summaries
-* Email: Brevo (Sendinblue) API and Nodemailer fallback
-* CI / CD: GitHub Actions, Vercel / Cloud provider for hosting
-
-## High-level architecture
-
-1. **Auth & DB**: Supabase handles authentication and stores user, course, session, and subscription metadata in Postgres.
-2. **Payments**: Stripe handles payment checkout; Stripe webhooks update subscription status in Supabase.
-3. **Realtime**: Vapi manages live sessions (rooms, signaling). Supabase realtime can be used for presence, chat, and lightweight state sync.
-4. **AI**: OpenAI is used to generate quizzes and session summaries on-demand. Generated artifacts are stored in Supabase and sent by email.
-5. **Email**: Brevo is used for transactional emails; Nodemailer used for server-side internal notifications or as fallback.
+</div>
 
 ---
 
-## Setup (Developer)
+## ❯ What It Does
 
-1. Clone the repo:
+OrbitLearn is a **multi-tenant LMS SaaS** where AI doesn't just assist — it co-teaches. Voice-powered tutors, instant quizzes from any lesson, and automatic session summaries sent to every learner's inbox. All under one subscription roof.
 
+```
+┌──────────────────────────────────────────────────────────────────┐
+│  A learner joins a session                                       │
+│     → Vapi AI tutor speaks, answers, guides                      │
+│     → Session ends                                               │
+│     → OpenAI generates a quiz + summary from the transcript      │
+│     → Brevo emails the summary to every attendee                 │
+│     → Progress tracked. Subscription managed. Done.             │
+└──────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## ◈ Feature Map
+
+```
+ORBITLEARN
+│
+├── 🎓  LEARNING
+│   ├── Course + lesson management (rich content types)
+│   ├── Companions — AI study partners per course
+│   ├── My Journey — personal progress tracker
+│   └── Multi-tenant orgs (team & enterprise)
+│
+├── 🔴  LIVE SESSIONS
+│   ├── Real-time rooms via Vapi (audio/video)
+│   ├── AI vocal tutor — speaks, explains, responds
+│   ├── In-session polls, chat, presence (Supabase Realtime)
+│   └── Attendance tracking + session recordings
+│
+├── 🤖  AI ENGINE
+│   ├── Quiz Generator — structured MCQs from lesson text
+│   ├── Session Summarizer — transcript → readable recap
+│   └── View Summary page — browse past session recaps
+│
+├── 💳  BILLING
+│   ├── Free / Pro / Team tiers (Stripe Checkout)
+│   ├── Webhook-driven lifecycle management
+│   └── Middleware-gated premium routes
+│
+├── 🔐  AUTH & SECURITY
+│   ├── Clerk (sign-in catch-all route + JWT)
+│   ├── Idempotent webhook handlers (Stripe + Vapi)
+│   └── Sentry — error monitoring across edge + server
+│
+└── ✉️  EMAILS
+    ├── Brevo — session reminders + summaries
+    └── Nodemailer — SMTP fallback + internal alerts
+```
+
+---
+
+## ◈ Under the Hood
+
+### System Architecture
+
+```
+                    ╔══════════════════════╗
+                    ║   Browser / Client   ║
+                    ║  Next.js App Router  ║
+                    ║  React + Tailwind    ║
+                    ╚══════════╤═══════════╝
+                               │
+           ┌───────────────────┼───────────────────┐
+           ▼                   ▼                   ▼
+    ╔═════════════╗    ╔══════════════╗    ╔═════════════╗
+    ║  Supabase   ║    ║    Stripe    ║    ║    Vapi     ║
+    ║  ─────────  ║    ║  ──────────  ║    ║  ─────────  ║
+    ║  Postgres   ║    ║  Checkout    ║    ║  Live Rooms ║
+    ║  Auth       ║    ║  Webhooks    ║    ║  AI Agent   ║
+    ║  Realtime   ║    ╚══════════════╝    ║  Webhooks   ║
+    ║  Storage    ║                        ╚═════════════╝
+    ╚══════╤══════╝
+           │
+    ╔══════▼══════╗          ╔══════════════╗
+    ║   OpenAI    ║          ║    Sentry    ║
+    ║  ─────────  ║          ║  ──────────  ║
+    ║  Quizzes    ║          ║  Edge Errors ║
+    ║  Summaries  ║          ║  Server Logs ║
+    ╚══════╤══════╝          ╚══════════════╝
+           │
+    ╔══════▼══════╗
+    ║    Email    ║
+    ║  ─────────  ║
+    ║   Brevo     ║
+    ║  Nodemailer ║
+    ╚═════════════╝
+```
+
+### Tech Stack
+
+| Layer | Technology | Role |
+|-------|-----------|------|
+| **Framework** | Next.js 14 (App Router) | Full-stack React, Server Actions, API routes |
+| **UI** | React + Tailwind CSS + shadcn/ui | Component system + utility styling |
+| **Database** | Supabase (Postgres + Realtime + Storage) | Data, presence, file storage |
+| **Auth** | Clerk | Sign-in/out, JWT, route protection |
+| **Billing** | Stripe | Checkout, subscriptions, webhooks |
+| **Live Sessions** | Vapi | Real-time rooms + AI vocal agent |
+| **AI** | OpenAI (GPT) | Quiz generation + session summaries |
+| **Email** | Brevo + Nodemailer | Transactional + SMTP fallback |
+| **Monitoring** | Sentry | Error tracking (client, server, edge) |
+| **CI/CD** | GitHub Actions + Vercel | Lint → test → deploy |
+
+---
+
+## ◈ Spin It Up
+
+### Prerequisites
+
+You'll need accounts for:
+[Supabase](https://supabase.com) · [Clerk](https://clerk.com) · [Stripe](https://stripe.com) · [Vapi](https://vapi.ai) · [OpenAI](https://openai.com) · [Brevo](https://brevo.com) · [Sentry](https://sentry.io)
+
+### Steps
+
+**1 — Clone**
 ```bash
-git clone https://github.com/<your-org>/orbitlearn.git
+git clone https://github.com/yo-soy-dev/OrbitLearn.git
 cd orbitlearn
 ```
 
-2. Install dependencies:
-
+**2 — Install**
 ```bash
-npm install
-# or
-pnpm install
+npm install        # or: pnpm install
 ```
 
-3. Create a `.env.local` (see [Environment variables](#environment-variables))
-4. Run database migrations / seeds (uses Supabase SQL or your preferred migration tool)
-5. Start dev server:
+**3 — Environment**
+```bash
+cp .env.example .env.local
+# Fill in your keys (see section below)
+```
 
+**4 — Database**
+```bash
+supabase db push
+# or apply /supabase/migrations manually via the SQL editor
+```
+
+**5 — Dev server**
 ```bash
 npm run dev
-# opens at http://localhost:3000
+# → http://localhost:3000
 ```
 
-### Useful scripts
+### Scripts
 
-* `npm run dev` — start Next.js in development
-* `npm run build` — build for production
-* `npm run start` — start production server
-* `npm run lint` — lint code
-* `npm run test` — run tests
-
-## Environment variables
-
-Create `.env.local` with at least the following keys (replace placeholders):
-
-```
-NEXT_PUBLIC_SUPABASE_URL=https://xyz.supabase.co
-SUPABASE_SERVICE_ROLE_KEY=your-supabase-service-role-key
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
-DATABASE_URL=postgres://user:pass@host:port/dbname
-NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_xxx
-STRIPE_SECRET_KEY=sk_test_xxx
-STRIPE_WEBHOOK_SECRET=whsec_xxx
-OPENAI_API_KEY=sk-xxxxxxxx
-VAPI_API_KEY=your_vapi_api_key
-BREVO_API_KEY=brevo_api_key
-EMAIL_FROM=no-reply@orbitlearn.com
-SMTP_HOST=smtp.example.com
-SMTP_PORT=587
-SMTP_USER=smtp-user
-SMTP_PASS=smtp-pass
-NEXTAUTH_URL=http://localhost:3000
-JWT_SECRET=some-secret-if-needed
-```
-
-> NOTE: Keep secret keys out of client bundles. Only expose `NEXT_PUBLIC_` keys to the browser.
-
-## Database & models
-
-Suggested core tables:
-
-* `users` (supabase auth + profile table)
-* `organizations` (for multi-tenant support)
-* `courses` (title, description, author_id)
-* `lessons` (course_id, content, content_type)
-* `sessions` (lesson_id, starts_at, ends_at, vapi_room_id, host_id)
-* `attendances` (session_id, user_id, join_time, leave_time)
-* `quizzes` (session_id | lesson_id, questions (json), generated_at)
-* `subscriptions` (user_id, stripe_subscription_id, status, tier)
-* `summaries` (session_id, summary_text, generated_at)
-
-Include indices on foreign keys and frequently queried columns.
-
-## Authentication & Authorization
-
-* Use Supabase Auth (email/password, social providers if needed).
-* Store role and organization metadata in the `users` profile.
-* Protect server-side APIs by verifying Supabase JWT or Service Role key where necessary.
-
-## Subscriptions & Payments
-
-1. Create products & prices in Stripe dashboard (Free / Pro / Team).
-2. Use Stripe Checkout for purchase flows and create a Subscription.
-3. Implement a webhook endpoint `/api/webhooks/stripe` to listen for events such as `invoice.paid`, `customer.subscription.updated`, `customer.subscription.deleted`.
-4. Update the `subscriptions` table in Supabase based on webhook events.
-5. Use middleware to gate paid routes and features based on subscription status.
-
-Security tips:
-
-* Verify webhook signatures (use `STRIPE_WEBHOOK_SECRET`).
-* Store Stripe IDs in DB and never trust client-provided status without server verification.
-
-## Real-time sessions with Vapi
-
-* Use Vapi SDK on the client to create/join rooms. The server should create a short-lived access token for Vapi sessions.
-* Persist `vapi_room_id` in the `sessions` table. Use webhooks from Vapi for events like `session.ended` or `recording.available`.
-* Use Supabase realtime channels for chat, attendance list, and small state sync.
-
-## AI features
-
-**Quiz generation**
-
-* Endpoint: `POST /api/ai/generate-quiz`
-* Input: lesson text or session transcript + desired number of questions
-* Flow: Call OpenAI with a prompt template that asks for structured JSON (questions, options, correct_index, explanation)
-* Save generated quizzes to `quizzes` and return to client for rendering.
-
-**Session summary**
-
-* Trigger summary generation after session end or on-demand.
-* Summaries stored in `summaries` and emailed to attendees.
-* Consider using conversation transcripts (Vapi recordings or realtime chat) as input to OpenAI.
-
-Prompt engineering: use explicit instructions and a JSON schema in your prompts to ensure reliably structured output.
-
-## Email notifications
-
-* Use Brevo API for transactional emails (session reminders, summaries). Use Nodemailer when SMTP is required or for internal notifications.
-* Endpoints send templated HTML emails. Keep templates in `emails/` and use a render engine (e.g., Handlebars) or JSX email templates.
-
-## Webhooks and reliability
-
-* Handle idempotency: store event IDs (Stripe, Vapi) in `webhook_events` table to prevent double-processing.
-* Retries: make webhook handlers idempotent and safe to re-run.
-
-## Deployment
-
-* Host frontend & server on Vercel (recommended) or any Node host. Ensure server functions can receive webhooks.
-* Use Supabase for hosted Postgres and Auth.
-* Configure environment variables in your hosting provider.
-* Configure Stripe webhooks to point to your production URL.
-
-## Testing & CI
-
-* Unit test AI prompt templates and API routes using Jest or Vitest.
-* Integration tests for webhooks (mock Stripe & Vapi events).
-* Add GitHub Actions for linting, tests, and deployment.
-
-## Roadmap / Future features
-
-* Live whiteboard, breakout rooms, in-session co-editing
-* Advanced analytics dashboard (engagement / completion rates)
-* Mobile clients (React Native)
-* Native recording storage and playback with captions
-
-## Contributing
-
-1. Fork and open a PR.
-2. Follow the coding style (Prettier + ESLint).
-3. Add tests for new features and update docs.
-
-## License
-
-MIT License — see `LICENSE` file.
+| Command | Action |
+|---------|--------|
+| `npm run dev` | Development server with hot reload |
+| `npm run build` | Production build |
+| `npm run start` | Serve production build |
+| `npm run lint` | ESLint check |
+| `npm run test` | Run test suite |
 
 ---
 
-If you want, I can also:
+## ◈ Environment Variables
 
-* Generate example `.sql` migration/seed files for the schema above
-* Provide sample Next.js API route templates for Stripe and OpenAI integration
-* Create email templates for session summary and reminders
+```env
+# ── Supabase ─────────────────────────────────────────────────────
+NEXT_PUBLIC_SUPABASE_URL=https://xyz.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
+SUPABASE_SERVICE_ROLE_KEY=your-service-role-key        # server-only
+DATABASE_URL=postgres://user:pass@host:port/dbname
 
-Happy building — 🚀
+# ── Clerk (Auth) ─────────────────────────────────────────────────
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_xxx
+CLERK_SECRET_KEY=sk_test_xxx
+
+# ── Stripe (Billing) ─────────────────────────────────────────────
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_xxx
+STRIPE_SECRET_KEY=sk_test_xxx                          # server-only
+STRIPE_WEBHOOK_SECRET=whsec_xxx                        # server-only
+
+# ── OpenAI (AI Features) ─────────────────────────────────────────
+OPENAI_API_KEY=sk-xxxxxxxx                             # server-only
+
+# ── Vapi (Live Sessions) ─────────────────────────────────────────
+VAPI_API_KEY=your_vapi_api_key                         # server-only
+
+# ── Brevo + Nodemailer (Email) ───────────────────────────────────
+BREVO_API_KEY=your_brevo_api_key
+EMAIL_FROM=no-reply@orbitlearn.com
+SMTP_HOST=smtp.example.com
+SMTP_PORT=587
+SMTP_USER=your-smtp-user
+SMTP_PASS=your-smtp-password
+
+# ── Sentry (Monitoring) ──────────────────────────────────────────
+NEXT_PUBLIC_SENTRY_DSN=https://xxx@sentry.io/xxx
+SENTRY_AUTH_TOKEN=your-sentry-auth-token
+
+# ── App ──────────────────────────────────────────────────────────
+NEXT_PUBLIC_APP_URL=http://localhost:3000
+```
+
+> `NEXT_PUBLIC_*` variables are exposed to the browser. Everything else is server-only. Never leak secret keys into client bundles.
+
+---
+
+## ◈ Data Schema
+
+```
+users ──────────────────── org_id → organizations
+  │
+  ├──→ subscriptions ────── stripe_subscription_id → Stripe
+  │
+  └──→ sessions (as host)
+         │
+         ├──→ attendances ── user_id → users
+         ├──→ quizzes      ── questions (JSON)
+         └──→ summaries    ── summary_text (Markdown)
+
+courses ── author_id → users
+  │
+  └──→ lessons
+         │
+         └──→ sessions ── vapi_room_id → Vapi
+
+webhook_events ── idempotency log (Stripe + Vapi event IDs)
+```
+
+| Table | Key Columns | Purpose |
+|-------|-------------|---------|
+| `users` | `id`, `email`, `role`, `org_id` | Auth profile + role |
+| `organizations` | `id`, `name`, `slug` | Multi-tenant isolation |
+| `courses` | `id`, `title`, `author_id`, `org_id` | Course catalog |
+| `lessons` | `id`, `course_id`, `content`, `content_type` | Lesson content |
+| `sessions` | `id`, `lesson_id`, `vapi_room_id`, `host_id`, `starts_at`, `ends_at` | Live sessions |
+| `attendances` | `session_id`, `user_id`, `join_time`, `leave_time` | Participation log |
+| `quizzes` | `id`, `session_id`, `questions` (JSON), `generated_at` | AI-generated quizzes |
+| `summaries` | `id`, `session_id`, `summary_text`, `generated_at` | AI session recaps |
+| `subscriptions` | `user_id`, `stripe_subscription_id`, `status`, `tier` | Billing state |
+| `webhook_events` | `event_id`, `source`, `processed_at` | Idempotency guard |
+
+Index on all foreign keys + `status`, `org_id`, `session_id`.
+
+---
+
+## ◈ Integration Notes
+
+### Stripe Webhooks → `/api/webhooks/stripe`
+```
+invoice.paid                   activate / renew subscription
+customer.subscription.updated  handle tier changes
+customer.subscription.deleted  downgrade or cancel
+```
+Always verify signatures with `STRIPE_WEBHOOK_SECRET`. Store all Stripe IDs server-side — never trust client-reported status.
+
+### Vapi Sessions
+Server issues a short-lived access token → client joins via Vapi SDK → `vapi_room_id` persisted in `sessions`. On `session.ended`, webhook triggers OpenAI summary generation → stored in `summaries` → emailed via Brevo.
+
+### AI Endpoints
+
+```
+POST /api/ai/generate-quiz
+  body:  { lessonText: string, numQuestions: number }
+  out:   { questions: [{ question, options, correct_index, explanation }] }
+
+POST /api/ai/generate-summary
+  body:  { sessionId: string, transcript: string }
+  out:   { summary: string (Markdown) }
+```
+
+Use a JSON schema in your OpenAI prompt to enforce structure. Store results before returning — don't regenerate on every request.
+
+---
+
+## ◈ Project Structure
+
+```
+orbitlearn/
+├── public/
+├── src/
+│   └── app/                              Next.js App Router root
+│       ├── api/                          API route handlers
+│       │   ├── webhooks/stripe/          Stripe webhook listener
+│       │   ├── webhooks/vapi/            Vapi event listener
+│       │   └── ai/                       Quiz + summary endpoints
+│       ├── companions/                   AI study partner pages
+│       ├── my-journey/                   Personal progress tracker
+│       ├── pricing/                      Subscription plan picker
+│       ├── quiz/                         Quiz UI pages
+│       ├── sign-in/[[...sign-in]]/       Clerk catch-all auth route
+│       ├── subscription/                 Billing management
+│       ├── viewsummary/                  Session recap browser
+│       ├── layout.tsx                    Root layout
+│       └── page.tsx                      Landing / home
+├── components/                           Shared UI components
+├── constants/                            App-wide constants
+├── lib/                                  DB clients, helpers, utils
+├── types/                                TypeScript definitions
+├── instrumentation.ts                    Sentry server init
+├── instrumentation-client.ts             Sentry client init
+├── middleware.ts                         Auth + route protection
+├── sentry.server.config.ts
+├── sentry.edge.config.ts
+├── next.config.ts
+├── components.json                       shadcn/ui config
+└── package.json
+```
+
+---
+
+## ◈ Deployment
+
+```
+1.  Push to GitHub
+       ↓
+2.  GitHub Actions → lint + test
+       ↓
+3.  Vercel auto-deploys on merge to main
+       ↓
+4.  Configure env vars in Vercel dashboard
+       ↓
+5.  Register webhooks:
+      Stripe  → https://yourdomain.com/api/webhooks/stripe
+      Vapi    → https://yourdomain.com/api/webhooks/vapi
+```
+
+Supabase handles Postgres, Auth, and Realtime — no extra infrastructure needed.
+
+---
+
+## ◈ What's Next
+
+```diff
++ Live whiteboard + breakout rooms
++ In-session collaborative document editing
++ Advanced analytics (completion rates, quiz scores, engagement heatmaps)
++ Mobile clients (React Native)
++ Recording playback with auto-generated captions
++ Custom email template builder
++ Self-hosted deployment guide (Docker + Railway)
+```
+
+---
+
+## ◈ Contributing
+
+```bash
+# 1. Fork → clone your fork
+# 2. Branch off main
+git checkout -b feat/your-feature
+
+# 3. Write code + tests
+# 4. Lint before pushing
+npm run lint
+
+# 5. Open a PR with context on what + why
+```
+
+- Follow **Prettier + ESLint** (enforced on CI)
+- Add tests for new features
+- Open an issue first for large changes
+
+---
+
+## ◈ License
+```
+MIT License
+
+Copyright (c) 2025 Soy-Yo-Dev
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+```
+---
+
+<div align="center">
+
+```
+ ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·
+          🪐  orbitlearn  ·  teaching at the speed of thought
+ ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·
+```
+
+[Report a Bug](https://github.com/yo-soy-dev/OrbitLearn/issues) · [Request a Feature](https://github.com/yo-soy-dev/OrbitLearn/issues) · [Discussions](https://github.com/yo-soy-dev/OrbitLearn/discussions)
+
+</div>
