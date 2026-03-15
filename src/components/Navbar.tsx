@@ -9,6 +9,7 @@ import {
   SignedOut,
   UserButton,
 } from "@clerk/nextjs";
+// import ThemeToggle from "./ThemeToggle";
 
 const Navbar = () => {
   return (
@@ -28,6 +29,7 @@ const Navbar = () => {
 
       <div className="flex items-center gap-4 sm:gap-8 flex-wrap justify-end max-sm:text-sm">
         <NavItems />
+         {/* <ThemeToggle /> */}
         <SignedOut>
           <SignInButton>
             <button className="btn-signin">Sign In</button>

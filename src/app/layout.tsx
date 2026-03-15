@@ -4,6 +4,7 @@ import {
   ClerkProvider,
 } from '@clerk/nextjs'
 import { Geist, Geist_Mono } from "next/font/google";
+// import { ThemeProvider } from "next-themes";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -32,16 +33,17 @@ export default function RootLayout({
 
  
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <ClerkProvider appearance={{ variables: { colorPrimary: '#FF0000' } }}>
+        {/* <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}> */}
+        <ClerkProvider appearance={{ variables: { colorPrimary: '#00FF00' } }}>
           <Navbar />
           {children}
-        {/* <ClientLayout>{children}</ClientLayout> */}
         </ClerkProvider>
         <Footer />
+        {/* </ThemeProvider> */}
       </body>
     </html>
   );

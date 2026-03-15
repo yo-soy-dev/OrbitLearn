@@ -11,7 +11,7 @@ export async function GET() {
   const { data: user, error } = await supabase
     .from("users")
     .select("plan, expired_at")
-    .eq("id", userId) // ✅ 'id' is your column name
+    .eq("id", userId) 
     .single();
 
   if (error || !user) return NextResponse.json({ plan: "free", active: false });
